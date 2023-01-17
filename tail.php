@@ -14,6 +14,8 @@
 
 
 		The main program (updateweatherstation.php) calls this function
+
+		install php-mbstring to use
 	*/
 
 	/**
