@@ -27,9 +27,9 @@ function weathercloud() {
     $wc_bar = $wc_variables[10];
 
     // output for debugging
-    if ($debug_mode != True) {
+    if ($debug_mode == True) {
 
-	echo "<br> -- start of weathercloud() function -- </br>";
+	    echo "<br> -- start of weathercloud() function -- </br>";
 
     	echo "<br>";
 
@@ -37,7 +37,7 @@ function weathercloud() {
 
     	echo "<br><br>";
 
-	// Show the variables split up
+	    // Show the variables split up
     	$i = 0;
     	foreach ($wc_variables as $wc_variable) {
     	        echo $i . " : " . $wc_variable . "<br>";
@@ -48,17 +48,13 @@ function weathercloud() {
 
     	echo "weathercloud barometer: " . $wc_bar;
 
-	echo "<br> -- end of weathercloud() function -- </br>";
+	    echo "<br> -- end of weathercloud() function -- </br>";
     }
 
     return $wc_bar;
 }
 
-// GET variables from wunderground
-//o
-
-
-/*
+/* These are the variables from wunderground
 ?ID=user
 &PASSWORD=passpass
 &action=updateraww
@@ -78,9 +74,10 @@ function weathercloud() {
 &indoorhumidity=55
 */
 
+// Gather all the variables and convert to metric units
 $user = $_GET['ID'];
 $password = $_GET['PASSWORD'];
-// pressure in inches mercury
+// pressure in inches mercury, will be disgarded as the weathercloud data is more accurate
 $baroinhg = $_GET['baromin'];
 // temp, inside and out and dewpoint converted to C
 $tempc = round((($_GET['tempf'] - 32) / 1.8), 2); 
@@ -101,8 +98,8 @@ $dailyrainmm = round($_GET["dailyrainin"] * 25.4, 2);
 
 echo "<h1>weather pws data capture</h1>";
 
+// Get the more accurate weathercloud barometric reading
 $bar = weathercloud();
-
 
 // output for debugging
 if ($debug_mode == True) {
