@@ -99,12 +99,15 @@ $dailyrainmm = round($_GET["dailyrainin"] * 25.4, 2);
 echo "<h1>weather pws data capture</h1>";
 
 // Get the more accurate weathercloud barometric reading
-$bar = weathercloud();
+$barhpa = weathercloud();
+
+// Set the weather station name as variable for now, in future this can be determined from user login details
+$pws = "pws";
 
 // output for debugging
 if ($debug_mode == True) {
     echo "<br>";
-    echo "weathercloud baro: " . ($bar / 10) , " hpa";
+    echo "weathercloud baro: " . ($barhpa / 10) , " hpa";
     echo "<br>";
     echo "<h2>Converted data from wunderground</h2>";
     echo "user: " . $user . "<br>";
@@ -121,6 +124,32 @@ if ($debug_mode == True) {
     echo "rain mm: " . $rainmm . "<br>";
     echo "daily rain mm: " . $dailyrainmm . "<br>";
 }
+
+/*
+// Lets connect to the db and insert all this data into it
+$servername = "localhost";
+$username = "metlog";
+$password = "metlog";
+$dbname = "metlog";
+
+// Create connection
+$conn = mysqli_connect($servername, $username, $password, $dbname);
+// Check connection
+if (!$conn) {
+  die("Connection failed: " . mysqli_connect_error());
+}
+
+$sql = "INSERT INTO snapshot (user, pws, barohpa, tempc, intempc, dewptc, humidity, inhumidity, windspeedms, windgustms, winddir, rainmm, dailyrainmm)
+VALUES ('user', 'pws', 'barohpa', 'tempc', 'intempc', 'dewptc', 'humidity', 'inhumidity', 'windspeedms', 'windgustms', 'winddir', 'rainmm', 'dailyrainmm')";
+
+if (mysqli_query($conn, $sql)) {
+  echo "New record created successfully";
+} else {
+  echo "Error: " . $sql . "<br>" . mysqli_error($conn);
+}
+
+mysqli_close($conn);
+*/
 
 ?>
 	
