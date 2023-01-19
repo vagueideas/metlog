@@ -13,41 +13,50 @@ $debug_mode = True;
 include 'tail.php';
 
 // Get the baromatric pressure sent in weathercloud api format
-function weathercloud() {
+function weathercloud($wid) {
 
     global $debug_mode;
 
-    // tail the last line of the weathercloud log file
-    $wc_recieved = tail('/var/log/weather/weathercloud_access.log');
-    
-    // Explode this string with "/" as a delimiter
-    $wc_variables = explode("/", $wc_recieved);
+    // Read the latest weathercloud data from the database
 
-    // Extract the barometer value (more accurate that wunderground's)
-    $wc_bar = $wc_variables[10];
+    // Lets connect to the db and insert all this data into it
+    $servername = "localhost";
+    $username = "metlog";
+    $password = "metlog";
+    $dbname = "metlog";
+
+    // Create connection
+    $conn = mysqli_connect($servername, $username, $password, $dbname);
+    // Check connection
+    if (!$conn) {
+      die("Connection failed: " . mysqli_connect_error());
+    }
+
+    $sql = "SELECT bar FROM weathercloud WHERE wid=$wid ORDER BY timestamp DESC LIMIT 1";
+    $result = mysqli_query($conn, $sql);
+
+    if ($debug_mode == True) {
+        echo $sql;
+        echo "<br>";
+    }
+
+    if (mysqli_num_rows($result) > 0) {
+        // output data of each row
+        while($row = mysqli_fetch_assoc($result)) {
+          $wc_bar = $row["bar"];
+        }
+      } else {
+        echo "0 results";
+      }
+      
 
     // output for debugging
     if ($debug_mode == True) {
 
 	    echo "<br> -- start of weathercloud() function -- </br>";
-
     	echo "<br>";
-
-    	echo "weather string: " . $wc_recieved;
-
     	echo "<br><br>";
-
-	    // Show the variables split up
-    	$i = 0;
-    	foreach ($wc_variables as $wc_variable) {
-    	        echo $i . " : " . $wc_variable . "<br>";
-    	        $i++;
-    	}
-    	
-    	echo "<br><br>";
-
     	echo "weathercloud barometer: " . $wc_bar;
-
 	    echo "<br> -- end of weathercloud() function -- </br>";
     }
 
@@ -99,8 +108,11 @@ $dailyrainmm = round($_GET["dailyrainin"] * 25.4, 1) * 10;
 
 echo "<h1>weather pws data capture</h1>";
 
+// In future version, get this from user db 
+$wid = "5283ef9c3c00581f"
+
 // Get the more accurate weathercloud barometric reading
-$barohpa = weathercloud();
+$barohpa = weathercloud($wid);
 
 // Set the weather station name as variable for now, in future this can be determined from user login details
 $pws = "pws";
