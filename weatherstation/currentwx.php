@@ -1,4 +1,9 @@
 <?php
+header("refresh: 9");
+
+echo "<style>";
+include 'style.css';
+echo "</style>";
 
 // 
 // currentwx.php - grabs the most recent record from the weather database
@@ -23,7 +28,7 @@ if (!$conn) {
 }
 
 //$sql = "SELECT user, pws, barohpa, tempc, intempc, dewptc, humidity, inhumidity, windspeedms, windgustms, winddir, rainmm, dailyrainmm FROM snapshot";
-$sql = "SELECT user, pws, barohpa, tempc, intempc, dewptc, humidity, inhumidity, windspeedms, windgustms, winddir, rainmm, dailyrainmm FROM snapshot ORDER BY timestamp DESC LIMIT 1";
+$sql = "SELECT user, pws, timestamp, barohpa, tempc, intempc, dewptc, humidity, inhumidity, windspeedms, windgustms, winddir, rainmm, dailyrainmm FROM snapshot ORDER BY timestamp DESC LIMIT 1";
 $result = mysqli_query($conn, $sql);
 
 if ($debug_mode == True) {
@@ -37,6 +42,18 @@ if (mysqli_num_rows($result) > 0) {
     echo "user: " . $row["user"] . " - pws: " . $row["pws"] . "<br>";
     $user = $row["user"];
     $pws = $row["pws"];
+    $timestamp = $row["timestamp"];
+    $barohpa = $row["barohpa"];
+    $tempc = $row["tempc"];
+    $intempc = $row["intempc"];
+    $dewptc = $row["dewptc"];
+    $humidity = $row["humidity"];
+    $inhumidity = $row["inhumidity"];
+    $windspeedms= $row["windspeedms"];
+    $windgustms = $row["windgustms"];
+    $winddir = $row["winddir"];
+    $rainmm = $row["rainmm"];
+    $dailyrainmm = $row["dailyrainmm"];
   }
 } else {
   echo "0 results";
@@ -78,6 +95,11 @@ if ($debug_mode == True) {
             <td>pws</td>
             <td>" . $pws . "</td>
             <td>" . $pws . "</td>
+        <tr>
+        <tr>
+            <td>timestamp</td>
+            <td>" . $timestamp . "</td>
+            <td>" . $timestamp . "</td>
         <tr>
         <tr>
             <td>barohpa</td>
