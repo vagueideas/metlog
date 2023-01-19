@@ -58,14 +58,13 @@ if ($debug_mode == True) {
 }
 
 
-
 if ($debug_mode == True) {
     echo "<h2>Weathercloud variables</h2>";
     echo "Weather station id: " . $wid . "<br>";
     echo "Weather station key: " . $key . "<br>";
     echo "Barometric pressure: " . $bar / 10 . " hpa<br>";
     echo "Wind direction: " . $wdir . "&deg<br>";
-    echo "Wind speed: " . $wspdi / 10 . " m/s<br>";
+    echo "Wind speed: " . $wspd / 10 . " m/s<br>";
     echo "Wind gust speed: " . $wspdhi / 10 . " m/s<br>";
     echo "Rain rate: " . $rainrate / 10 . " mm/hr<br>";
     echo "Daily rain: " . $rain / 10 . " mm<br>";
@@ -77,11 +76,31 @@ if ($debug_mode == True) {
     echo "Indoor humidity: " . $humin . "%<br>";
 }
 
+// Lets connect to the db and insert all this data into it
+$servername = "localhost";
+$username = "metlog";
+$password = "metlog";
+$dbname = "metlog";
 
+// Create connection
+$conn = mysqli_connect($servername, $username, $password, $dbname);
+// Check connection
+if (!$conn) {
+  die("Connection failed: " . mysqli_connect_error());
+}
 
+$sql = "INSERT INTO weathercloud  (pwskey, wid, bar, temp, chill, tempin, dew, hum, humin, wspd, wspdhi, wdir, rainrate, rain)
+VALUES ('$key', '$wid', $bar, $temp, $chill, $tempin, $dew, $hum, $humin, $wspd, $wspdhi, $wdir, $rainrate, $rain)";
 
+if ($debug_mode == True) {
+    if (mysqli_query($conn, $sql)) {
+      echo "New record created successfully";
+    } else {
+      echo "Error: " . $sql . "<br>" . mysqli_error($conn);
+    }
+}
 
-
+mysqli_close($conn);
 
 
 ?>
