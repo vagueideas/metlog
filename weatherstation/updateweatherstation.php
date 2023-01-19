@@ -1,7 +1,7 @@
 <?php
 
 // 
-// updateweatherstation.php v 0.1 - captures data sent by PWS and inserts into database
+// updateweatherstation.php v 0.2 - captures data sent by PWS and inserts into database
 // CS50 Final project
 // phil davis Jan 2023
 //
