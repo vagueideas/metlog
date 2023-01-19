@@ -32,7 +32,7 @@ function weathercloud($wid) {
       die("Connection failed: " . mysqli_connect_error());
     }
 
-    $sql = "SELECT bar FROM weathercloud WHERE wid=$wid ORDER BY timestamp DESC LIMIT 1";
+    $sql = "SELECT bar FROM weathercloud WHERE wid=\"$wid\" ORDER BY timestamp DESC LIMIT 1";
     $result = mysqli_query($conn, $sql);
 
     if ($debug_mode == True) {
@@ -55,8 +55,8 @@ function weathercloud($wid) {
 
 	    echo "<br> -- start of weathercloud() function -- </br>";
     	echo "<br>";
-    	echo "<br><br>";
     	echo "weathercloud barometer: " . $wc_bar;
+    	echo "<br>";
 	    echo "<br> -- end of weathercloud() function -- </br>";
     }
 
@@ -109,7 +109,7 @@ $dailyrainmm = round($_GET["dailyrainin"] * 25.4, 1) * 10;
 echo "<h1>weather pws data capture</h1>";
 
 // In future version, get this from user db 
-$wid = "5283ef9c3c00581f"
+$wid = "5283ef9c3c00581f";
 
 // Get the more accurate weathercloud barometric reading
 $barohpa = weathercloud($wid);
@@ -129,7 +129,7 @@ if ($debug_mode == True) {
     echo "baro in inhg: " . $baroinhg . " (not used)<br>";
     echo "temp (F): " . $_GET['tempf'] . ", temp (C): . " . $tempc . "<br>";
     echo "indoor temp (F): " . $_GET['indoortempf'] . ", temp (C): . " . $intempc . "<br>";
-    echo "dewpt (F): " . $_GET['dewptf'] . ", dewpt (C): . " . $dewptc . "<br>";
+    echo "dewpt (F): " . $_GET['dewptf'] . ", dewpt (C): " . $dewptc . "<br>";
     echo "humidity: " . $humidity . "<br>";
     echo "indoor humidity: " . $inhumidity . "<br>";
     echo "windspeed m/s: " . $windspeedms . "<br>";
