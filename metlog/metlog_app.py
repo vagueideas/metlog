@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from helpers import login_required
 
 # Configure application
@@ -17,3 +17,16 @@ def index():
 def login():
 
     return render_template("login.html")
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    """ register user """
+
+    if request.method == "POST":
+        return render_template("register.html")
+
+    else:
+        return render_template("register.html")
+        
+
+
