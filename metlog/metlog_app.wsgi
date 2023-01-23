@@ -1,5 +1,11 @@
 #! /usr/bin/python3.9
 
+import os 
+
+here = os.path.dirname(__file__)
+os.chdir(here)
+
+
 import logging
 import sys
 logging.basicConfig(stream=sys.stderr)
