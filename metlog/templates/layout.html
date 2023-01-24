@@ -31,12 +31,12 @@
                 <!-- <a class="nav-link active" aria-current="page" href="#">Home</a> -->
                 <a class="nav-link" href="#">current</a>
                 <a class="nav-link" href="#">settings</a>
-                <a class="nav-link" href="#">logout</a>
+                <a class="nav-link" href="/logout">logout</a>
                 <!-- <a class="nav-link disabled">Disabled</a> -->
             
                 {% else %}
                 <a class="nav-link"  href="/register">register</a>
-                <a class="nav-link" href="#">login</a>
+                <a class="nav-link" href="/logout">login</a>
                 {% endif %}
 
               </div>
@@ -44,8 +44,13 @@
           </div>
         </nav>
 
-
-    <h1>metlog</h1>
+    <main class="container-fluid py-5 text-center">
+        {% block main %}{% endblock %}
+    </main>
+    
+    <footer class="mb-5 small text-center text-muted">
+        metlog &copy phil davis 2023
+    </footer>
 
   </body>
 
