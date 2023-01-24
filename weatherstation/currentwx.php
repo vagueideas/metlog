@@ -32,7 +32,7 @@ if (!$conn) {
 }
 
 //$sql = "SELECT user, pws, barohpa, tempc, intempc, dewptc, humidity, inhumidity, windspeedms, windgustms, winddir, rainmm, dailyrainmm FROM snapshot";
-$sql = "SELECT user, pws, timestamp, barohpa, tempc, intempc, dewptc, humidity, inhumidity, windspeedms, windgustms, winddir, rainmm, dailyrainmm FROM snapshot ORDER BY timestamp DESC LIMIT 1";
+$sql = "SELECT pwsid, pwskey, timestamp, barohpa, tempc, intempc, dewptc, humidity, inhumidity, windspeedms, windgustms, winddir, rainmm, dailyrainmm FROM snapshot ORDER BY timestamp DESC LIMIT 1";
 $result = mysqli_query($conn, $sql);
 
 if ($debug_mode == True) {
@@ -44,8 +44,8 @@ if ($debug_mode == True) {
 if (mysqli_num_rows($result) > 0) {
   // output data of each row
   while($row = mysqli_fetch_assoc($result)) {
-    $user = $row["user"];
-    $pws = $row["pws"];
+    $pwsid = $row["pwsid"];
+    $pwskey = $row["pwskey"];
     $timestamp = $row["timestamp"];
     $barohpa = $row["barohpa"];
     $tempc = $row["tempc"];
@@ -90,14 +90,14 @@ echo "
         <th>Displayed value </th>
     </tr>
     <tr>
-        <td>user</td>
-        <td>" . $user . "</td>
-        <td>" . $user . "</td>
+        <td>pwsid</td>
+        <td>" . $pwsid . "</td>
+        <td>" . $pwsid . "</td>
     <tr>
     <tr>
-        <td>pws</td>
-        <td>" . $pws . "</td>
-        <td>" . $pws . "</td>
+        <td>pwskey</td>
+        <td>" . $pwskey . "</td>
+        <td>" . $pwskey . "</td>
     <tr>
     <tr>
         <td>timestamp</td>

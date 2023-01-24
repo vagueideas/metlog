@@ -85,8 +85,8 @@ function weathercloud($wid) {
 
 // Gather all the variables and convert to metric units
 // Values are multiplied, usually by 10, to get rid of decimal points so are of type INT
-$user = $_GET['ID'];
-$password = $_GET['PASSWORD'];
+$pwsid = $_GET['ID'];
+$pwskey = $_GET['PASSWORD'];
 // pressure in inches mercury, will be disgarded as the weathercloud data is more accurate
 $baroinhg = $_GET['baromin'];
 // temp, inside and out and dewpoint converted to C
@@ -108,8 +108,8 @@ $dailyrainmm = round($_GET["dailyrainin"] * 25.4, 1) * 10;
 
 echo "<h1>weather pws data capture</h1>";
 
-// In future version, get this from user db 
-$wid = "5283ef9c3c00581f";
+// Weathercloud wid and wunderground id must match
+$wid = $pwsid;
 
 // Get the more accurate weathercloud barometric reading
 $barohpa = weathercloud($wid);
@@ -151,14 +151,14 @@ if ($debug_mode == True) {
             <th>Displayed value </th>
         </tr>
         <tr>
-            <td>user</td>
-            <td>" . $user . "</td>
-            <td>" . $user . "</td>
+            <td>pwsid</td>
+            <td>" . $pwsid . "</td>
+            <td>" . $pwsid . "</td>
         <tr>
         <tr>
-            <td>pws</td>
-            <td>" . $pws . "</td>
-            <td>" . $pws . "</td>
+            <td>pwskey</td>
+            <td>" . $pwskey . "</td>
+            <td>" . $pwskey . "</td>
         <tr>
         <tr>
             <td>barohpa</td>
@@ -234,8 +234,8 @@ if (!$conn) {
   die("Connection failed: " . mysqli_connect_error());
 }
 
-$sql = "INSERT INTO snapshot (user, pws, barohpa, tempc, intempc, dewptc, humidity, inhumidity, windspeedms, windgustms, winddir, rainmm, dailyrainmm)
-VALUES ('$user', '$pws', $barohpa, $tempc, $intempc, $dewptc, $humidity, $inhumidity, $windspeedms, $windgustms, $winddir, $rainmm, $dailyrainmm)";
+$sql = "INSERT INTO snapshot (pwsid, pwskey, barohpa, tempc, intempc, dewptc, humidity, inhumidity, windspeedms, windgustms, winddir, rainmm, dailyrainmm)
+VALUES ('$pwsid', '$pwskey', $barohpa, $tempc, $intempc, $dewptc, $humidity, $inhumidity, $windspeedms, $windgustms, $winddir, $rainmm, $dailyrainmm)";
 
 if ($debug_mode == True) {
     if (mysqli_query($conn, $sql)) {

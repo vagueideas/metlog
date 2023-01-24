@@ -1,0 +1,102 @@
+{% extends "layout.html" %}
+
+{% block title %}
+     - current weather
+{% endblock %}
+
+{% block main %}
+
+    <h1>current weather conditions:</h1>
+    <h2>{{ pwsid }}</h2>
+    <br>
+
+    <!-- 
+    <div class="alert alert-dark" role="alert">
+    {{ currentwx }}
+    </div>
+
+    <br>
+
+    {{ currentwx.barohpa / 10 }}
+    -->
+
+    <table class="table text-start">
+    <tr>
+        <th>variable </th>
+        <th>value </th>
+    </tr>
+    <!-- 
+    <tr>
+        <td>pwsid</td>
+        <td>{{ currentwx.pwsid }}</td>
+    <tr>
+    <tr>
+        <td>pwskey</td>
+        <td>{{ currentwx.pwskey }}</td>
+    <tr>
+    -->
+    <tr>
+        <td >timestamp</td>
+        <td>{{ currentwx.timestamp }}</td>
+    <tr>
+    <tr>
+        <td>air pressure</td>
+        <td>{{ currentwx.barohpa / 10 }} hpa</td>
+    <tr>
+    <tr>
+        <td>temperature</td>
+        <td>{{ currentwx.tempc / 10 }} &degC</td>
+    <tr>
+    <tr>
+        <td>indoor temperature</td>
+        <td>{{ currentwx.intempc / 10 }} &degC</td>
+    <tr>
+    <tr>
+        <td>dew point</td>
+        <td>{{ currentwx.dewptc / 10 }} &degC</td>
+    <tr>
+    <tr>
+        <td>humidity</td>
+        <td>{{ currentwx.humidity }} %</td>
+    <tr>
+    <tr>
+        <td>indoor humidity</td>
+        <td>{{currentwx.inhumidity}} %</td>
+    <tr>
+    <tr>
+        <td>wind speed </td>
+        <td>{{ currentwx.windspeedms / 100 }} m/s</td>
+    <tr>
+    <tr>
+        <td>wind gust</td>
+        <td>{{ currentwx.windgustms / 100 }} m/s</td>
+    <tr>
+    <tr>
+        <td>wind direction</td>
+        <td>{{ currentwx.winddir }}&deg </td>
+    <tr>
+    <tr>
+        <td>rain</td>
+        <td>{{ currentwx.rainmm }} mm/hr</td>
+    <tr>
+    <tr>
+        <td>daily rain</td>
+        <td>{{ currentwx.dailyrainmm }} mm</td>
+    <tr>
+
+
+    </table>
+
+    <script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script src="static/js/jquery.tempgauge.js"></script>
+
+    <div class="tempGauge-demo">{{ currentwx.tempc / 10 }}&degC</div>
+    <script>$(".tempGauge-demo").tempGauge({
+
+        showLabel:true
+
+    });
+    </script>
+
+
+{% endblock %}
