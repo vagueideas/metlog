@@ -1,7 +1,7 @@
 <?php
 
 // 
-// updateweatherstation.php v 0.2 - captures data sent by PWS and inserts into database
+// updateweatherstation.php v 0.3 - captures data sent by PWS and inserts into database
 // CS50 Final project
 // phil davis Jan 2023
 //
@@ -114,8 +114,8 @@ $wid = $pwsid;
 // Get the more accurate weathercloud barometric reading
 $barohpa = weathercloud($wid);
 
-// Set the weather station name as variable for now, in future this can be determined from user login details
-$pws = "pws";
+// weather station id sent by weatherstation, must match user entered details
+$pws = "pwsid";
 
 // output for debugging
 if ($debug_mode == True) {
