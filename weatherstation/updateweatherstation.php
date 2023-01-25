@@ -12,25 +12,24 @@ $debug_mode = True;
 // include this php file to read system log files
 include 'tail.php';
 
+// Read the latest weathercloud data from the database
+$servername = "localhost";
+$username = "metlog";
+$password = "metlog";
+$dbname = "metlog";
+
+// Create connection
+$conn = mysqli_connect($servername, $username, $password, $dbname);
+// Check connection
+if (!$conn) {
+  die("Connection failed: " . mysqli_connect_error());
+}
+
 // Get the baromatric pressure sent in weathercloud api format
 function weathercloud($wid) {
 
     global $debug_mode;
-
-    // Read the latest weathercloud data from the database
-
-    // Lets connect to the db and insert all this data into it
-    $servername = "localhost";
-    $username = "metlog";
-    $password = "metlog";
-    $dbname = "metlog";
-
-    // Create connection
-    $conn = mysqli_connect($servername, $username, $password, $dbname);
-    // Check connection
-    if (!$conn) {
-      die("Connection failed: " . mysqli_connect_error());
-    }
+    global $conn;
 
     $sql = "SELECT bar FROM weathercloud WHERE wid=\"$wid\" ORDER BY timestamp DESC LIMIT 1";
     $result = mysqli_query($conn, $sql);
@@ -61,6 +60,142 @@ function weathercloud($wid) {
     }
 
     return $wc_bar;
+}
+
+function wxrecord($saved_var, $current_var, $current, $pwsid) {
+
+    global $debug_mode;
+    global $conn;
+
+    if ($debug_mode == True) {
+        echo "<h2>Getting and setting weather records</h2>";
+    }
+
+    // get record from the db
+    $sql = "SELECT id, $saved_var FROM wxrecords WHERE pwsid=\"$pwsid\" AND date(timestamp)=curdate() AND $saved_var IS NOT NULL";
+
+    if ($debug_mode == True) {
+        echo "<br>db query: " . $sql;
+    }
+
+    // Run this query
+    $result = mysqli_query($conn, $sql);
+
+    // If there is already a result check if new high
+    if (mysqli_num_rows($result) > 0) {
+
+        // output data of each row
+        while($row = mysqli_fetch_assoc($result)) {
+        
+            if ($debug_mode == True) {
+                echo "<br>id: " . $row["id"]. " - value: " . $row[$saved_var]. " - pwsid: " . $pwsid . "<br>";
+            }
+            
+            # saved value from the db, if new record then delete that row with this id 
+            $id = $row["id"];
+            $saved = $row[$saved_var];
+            
+            if ($debug_mode == True) {
+                echo "<br>id: " . $id . " saved value: " . $saved;
+            }
+          
+
+            if ($debug_mode == True) {
+                echo "<br>old value: " . $saved . ", new value: " . $current;
+            }
+
+            // greater or lesser
+            // the default of high records do this
+
+            // if we are going for low records do this
+            switch ($saved_var) {
+                case "tempclo":
+                    $compare = ($current < $saved);
+                    break;
+                case "intempclo":
+                    $compare = ($current < $saved);
+                    break;
+                default:
+                    $compare = ($saved < $current);
+            }
+
+           
+            //if ($current > $saved) {
+            if ($compare) {
+            
+                if ($debug_mode == True) {
+
+                  echo "<br>New record!";
+                }
+            
+                # run 2 queries, create new record and delete the old
+                $sql = "INSERT INTO wxrecords (pwsid, $saved_var) VALUES (\"$pwsid\", $current)";
+
+                if ($debug_mode == True) {
+
+                    if (mysqli_query($conn, $sql)) {
+                      echo "<br>" . $sql;
+                      echo "<br>New record created successfully";
+
+                    } else {
+                      echo "Error: " . $sql . "<br>" . mysqli_error($conn);
+                    }
+
+                } else {
+                    # debugging not enabled, just run the query
+                    mysqli_query($conn, $sql);
+                }
+
+                $sql = "DELETE FROM wxrecords WHERE id=$id";
+            
+            # entry exists, but is higher than current value, nothing to do
+            } else {
+            
+                if ($debug_mode == True) {
+                  echo "<br>no new record, nothing to update";
+                  return;
+                }
+            }
+        }
+    # else there is no entry in the db, create a new one
+    } else {
+        $sql = "INSERT INTO wxrecords (pwsid, $saved_var) VALUES (\"$pwsid\", $current)";
+
+        if ($debug_mode == True) {
+            echo "<br>0 results, create new entry.";
+        }
+    }
+
+    if ($debug_mode == True) {
+
+        if (mysqli_query($conn, $sql)) {
+          echo "<br>" . $sql;
+          echo "<br>New record created successfully";
+
+        } else {
+          echo "Error: " . $sql . "<br>" . mysqli_error($conn);
+        }
+
+    } else {
+        # debugging not enabled, just run the query
+        mysqli_query($conn, $sql);
+    }
+
+    return;
+}
+
+// Lets connect to the db and insert all this data into it
+$servername = "localhost";
+$username = "metlog";
+$password = "metlog";
+$dbname = "metlog";
+
+// Create connection
+$conn = mysqli_connect($servername, $username, $password, $dbname);
+
+// Check connection
+if (!$conn) {
+  die("Connection failed: " . mysqli_connect_error());
 }
 
 /* These are the variables from wunderground
@@ -221,19 +356,6 @@ if ($debug_mode == True) {
 
 }
 
-// Lets connect to the db and insert all this data into it
-$servername = "localhost";
-$username = "metlog";
-$password = "metlog";
-$dbname = "metlog";
-
-// Create connection
-$conn = mysqli_connect($servername, $username, $password, $dbname);
-// Check connection
-if (!$conn) {
-  die("Connection failed: " . mysqli_connect_error());
-}
-
 $sql = "INSERT INTO snapshot (pwsid, pwskey, barohpa, tempc, intempc, dewptc, humidity, inhumidity, windspeedms, windgustms, winddir, rainmm, dailyrainmm)
 VALUES ('$pwsid', '$pwskey', $barohpa, $tempc, $intempc, $dewptc, $humidity, $inhumidity, $windspeedms, $windgustms, $winddir, $rainmm, $dailyrainmm)";
 
@@ -243,6 +365,8 @@ if ($debug_mode == True) {
     } else {
       echo "Error: " . $sql . "<br>" . mysqli_error($conn);
     }
+} else {
+    mysqli_query($conn, $sql);
 }
 
 // Check and set weather records
@@ -260,62 +384,17 @@ if ($debug_mode == True) {
 // To set a record, get the values from the records table for today, if the current value 
 // is higher, update the record
 
-function wxrecord($saved_var, $current_var, $current, $pwsid) {
 
-    global $debug_mode;
-    global $conn;
-        
-    if ($debug_mode == True) {
-        echo "<h2>Getting and setting weather records</h2>";
-    }
-
-    // get record from the db
-    $sql = "SELECT $saved_var FROM wxrecords WHERE pwsid=\"$pwsid\" AND date(timestamp)=curdate()";
-
-        if ($debug_mode == True) {
-            echo "<br>db query: " . $sql;
-        }
-
-    $saved = mysqli_query($conn, $sql);
-
-    //echo $saved . "<br>";
-
-    if (mysqli_num_rows($saved) == 0) {
-         $sql = "INSERT INTO wxrecords (pwsid, $saved_var) VALUES (\"$pwsid\", $current)";
-    } else { 
-        $sql = "UPDATE wxrecords SET $saved_var = $current WHERE pwsid=\"$pwsid\" AND date(timestamp)=curdate()";
-    }
-
-    if ($debug_mode == True) {
-        echo "<br>db query: " . $sql;
-    }
-
-    if ($current > $saved) {
-        # if new record, insert new high record into db
-        // $sql = "UPDATE wxrecords SET ($saved_var) WHERE pwsid=$pwsid AND date(timestamp)=curdate() VALUES ($current)";
-
-        if ($debug_mode == True) {
-            echo "<br>db query: " . $sql;
-        }
-
-        echo "<br>";
-
-        if ($debug_mode == True) {
-            if (mysqli_query($conn, $sql)) {
-              echo "New record created successfully";
-            } else {
-              echo "Error: " . $sql . "<br>" . mysqli_error($conn);
-            }
-        }
-    }
-}
-
-// params: name of saved value, name of current value, current value
+// params: name of saved value, name of current value, current value, pwsid
 wxrecord("tempchi", "tempc", $tempc, $pwsid);
+wxrecord("tempclo", "tempc", $tempc, $pwsid);
 wxrecord("intempchi", "intempc", $intempc, $pwsid);
+wxrecord("intempclo", "intempc", $intempc, $pwsid);
 wxrecord("windspeedmshi", "windspeedms", $windspeedms, $pwsid);
+wxrecord("windgustmshi", "windgustms", $windgustms, $pwsid);
+wxrecord("rainmmhi", "rainmm", $rainmm, $pwsid);
+wxrecord("dailyrainmmhi", "dailyrainmm", $dailyrainmm, $pwsid);
 
 mysqli_close($conn);
 
 ?>
-	
