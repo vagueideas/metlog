@@ -20,6 +20,19 @@
     {{ currentwx.barohpa / 10 }}
     -->
 
+    <!-- display some gaugues -->
+    <script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script src="static/js/jquery.tempgauge.js"></script>
+
+    <div class="tempGauge-demo">{{ currentwx.tempc / 10 }}&degC</div>
+    <script>$(".tempGauge-demo").tempGauge({
+
+        showLabel:true
+
+    });
+    </script>
+
+
     <table class="table text-start">
     <tr>
         <th>variable </th>
@@ -86,17 +99,6 @@
 
 
     </table>
-
-    <script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
-    <script src="static/js/jquery.tempgauge.js"></script>
-
-    <div class="tempGauge-demo">{{ currentwx.tempc / 10 }}&degC</div>
-    <script>$(".tempGauge-demo").tempGauge({
-
-        showLabel:true
-
-    });
-    </script>
 
 
 {% endblock %}

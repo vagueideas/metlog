@@ -25,35 +25,54 @@ db = mydb.cursor()
 def index():
     # Show current weather conditions
 
+    # Get user id...
+    userid = session["user_id"]
+
     # Get user id and set for session
     sql = "SELECT user FROM users WHERE id = %s"
-    value = (session["user_id"], )
+    value = (userid, )
     db.execute(sql, value)
     rows = db.fetchone()
 
     user = rows[0]
 
-    return render_template("index.html", user=user)
+    # Get all the user's weather stations
+    sql = "SELECT id, pwsid, name, description FROM pws WHERE userid = %s"
+    value = (userid, )
+    db.execute(sql, value)
+    rows = db.fetchall()
+
+    # If there are no weather stations
+    if not rows:
+        # A value of 0 will prompt the user to setup a new pws
+        rows = 0
+    else:
+        # Create a list of pws info
+        pws = []
+
+        for i in range(len(rows)):
+            id = rows[i][0]
+            pwsid = rows[i][1]
+            description = rows[i][2]
+
+            # place into dict
+            pwsinfo = {'id': id, 'pwsid': pwsid, 'description': description}
+            pws.append(pwsinfo)
+
+    return render_template("index.html", user=user, rows=rows, pws=pws)
 
 @app.route("/current", methods=["GET", "POST"])
 @login_required
 def current():
     """ show the current weather conditions """
 
-    if request.method == "POST":
+    if request.method == "GET":
         # allow user to select pws
-        return info_msg("todo")
+        return info_msg("no weather station selected")
 
     else:
-        # Get user id...
-        userid = session["user_id"]
-
-        # Get the weather station
-        sql = "SELECT pwsid FROM pws WHERE userid = %s"
-        value = (userid, )
-        db.execute(sql, value)
-        rows = db.fetchone()
-        pwsid = rows[0]
+        # Get weather station id
+        pwsid = request.form.get("pwsid")
 
         # Get the weather from this pws
         sql = "SELECT pwsid, pwskey, timestamp, barohpa, tempc, intempc, dewptc, humidity, inhumidity, windspeedms,"\
@@ -62,12 +81,14 @@ def current():
         db.execute(sql, value)
         rows = db.fetchall()
 
+        if not rows:
+            return error_msg("no weather data found: is weather station online?")
+
         # put this into a dict:
         currentwx = {'pwsid': rows[0][0], 'pwskey': rows[0][1], 'timestamp': rows[0][2], 'barohpa': rows[0][3],\
-                     'tempc': rows[0][4], 'intempc': rows[0][5], 'dewptc': rows[0][6], 'humidity': rows[0][7],\
-                     'inhumidity': rows[0][8], 'windspeedms': rows[0][9], 'windgustms': rows[0][10],\
-                      'winddir': rows[0][11], 'rainmm': rows[0][12], 'dailyrainmm': rows[0][13]}
-
+                 'tempc': rows[0][4], 'intempc': rows[0][5], 'dewptc': rows[0][6], 'humidity': rows[0][7],\
+                 'inhumidity': rows[0][8], 'windspeedms': rows[0][9], 'windgustms': rows[0][10],\
+                  'winddir': rows[0][11], 'rainmm': rows[0][12], 'dailyrainmm': rows[0][13]}
         return render_template("current.html", pwsid=pwsid, currentwx=currentwx)
 
 @app.route("/addpws", methods=["GET", "POST"])

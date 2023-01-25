@@ -9,4 +9,55 @@
 
     <p>You are logged in as {{ user }} </p>
 
+    <!-- 
+    rows: {{ rows }}
+
+    <br>
+
+    pws: {{ pws }}
+
+    <br>
+    -->
+
+    {% if rows == 0 %}
+
+    <div class="alert alert-dark" role="alert">
+    You haven't set a weather station up yet:   
+    <a class="btn btn-dark" href="/addpws" role="button">add weather station</a>
+    </div>
+
+    {% else %}
+
+        <h2>weather stations</h2>
+
+
+        <table class="table">
+        <tr>
+        <th>name</th>
+        <th>description</th>
+        <th>current weather</th>
+        </tr>
+
+        {% for row in pws %}
+
+            <tr>
+                <td>{{ row.pwsid }} </td>
+                <td>{{ row.description }} </td>
+                <td>
+                    <form action="/current" method="post">
+                        <button class="btn btn-dark" id="pwsid" name="pwsid" value="{{row.pwsid}}" type="submit">report</button>
+                    </form>
+                </td>
+            </tr>
+
+        {% endfor %}
+
+        </table>
+
+
+    {% endif %}
+
+    
+
+
 {% endblock %}
