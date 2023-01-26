@@ -36,6 +36,7 @@
         <th>name</th>
         <th>description</th>
         <th>current weather</th>
+        <th>temperature</th>
         </tr>
 
         {% for row in pws %}
@@ -46,6 +47,11 @@
                 <td>
                     <form action="/current" method="post">
                         <button class="btn btn-dark" id="pwsid" name="pwsid" value="{{row.pwsid}}" type="submit">report</button>
+                    </form>
+                </td>
+                <td>
+                    <form action="/temperature" method="post">
+                        <button class="btn btn-dark" id="pwsid" name="pwsid" value="{{row.pwsid}}" type="submit">details</button>
                     </form>
                 </td>
             </tr>

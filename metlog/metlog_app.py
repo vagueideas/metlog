@@ -91,6 +91,86 @@ def current():
                   'winddir': rows[0][11], 'rainmm': rows[0][12], 'dailyrainmm': rows[0][13]}
         return render_template("current.html", pwsid=pwsid, currentwx=currentwx)
 
+@app.route("/temperature", methods=["GET", "POST"])
+@login_required
+def temperature():
+    """ show the temperature info """
+
+    if request.method == "GET":
+        # allow user to select pws
+        return info_msg("no weather station selected")
+
+    else:
+        # Get weather station id
+        pwsid = request.form.get("pwsid")
+
+        # Get the weather from this pws
+        sql = "SELECT pwsid, pwskey, timestamp, barohpa, tempc, intempc, dewptc, humidity, inhumidity, windspeedms,"\
+              "windgustms, winddir, rainmm, dailyrainmm FROM snapshot WHERE pwsid = %s ORDER BY timestamp DESC LIMIT 1";
+        value = (pwsid, )
+        db.execute(sql, value)
+        rows = db.fetchall()
+
+        if not rows:
+            return error_msg("no weather data found: is weather station online?")
+
+        # put this into a dict:
+        currentwx = {'pwsid': rows[0][0], 'pwskey': rows[0][1], 'timestamp': rows[0][2], 'barohpa': rows[0][3],\
+                 'tempc': rows[0][4], 'intempc': rows[0][5], 'dewptc': rows[0][6], 'humidity': rows[0][7],\
+                 'inhumidity': rows[0][8], 'windspeedms': rows[0][9], 'windgustms': rows[0][10],\
+                  'winddir': rows[0][11], 'rainmm': rows[0][12], 'dailyrainmm': rows[0][13]}
+
+        # Today's temp high
+        sql = "SELECT tempchi FROM wxrecords WHERE pwsid = %s AND date(timestamp)=curdate() AND tempchi IS NOT NULL "\
+              "ORDER BY timestamp DESC Limit 1";
+        value = (pwsid, )
+        db.execute(sql, value)
+        rows = db.fetchone()
+
+        if not rows:
+            return error_msg("no weather data found: is weather station online?")
+
+        todaytemphi = rows[0]
+
+        # Today's temp low
+        sql = "SELECT tempclo FROM wxrecords WHERE pwsid = %s AND date(timestamp)=curdate() AND tempclo IS NOT NULL "\
+              "ORDER BY timestamp ASC Limit 1";
+        value = (pwsid, )
+        db.execute(sql, value)
+        rows = db.fetchone()
+
+        if not rows:
+            return error_msg("no weather data found: is weather station online?")
+
+        todaytemplo = rows[0]
+
+        # weekly temp high
+        sql = "SELECT tempchi FROM wxrecords WHERE pwsid = %s AND yearweek(timestamp)=YEARWEEK(NOW()) AND tempchi IS NOT NULL "\
+              "ORDER BY timestamp DESC Limit 1";
+        value = (pwsid, )
+        db.execute(sql, value)
+        rows = db.fetchone()
+
+        if not rows:
+            return error_msg("no weather data found: is weather station online?")
+
+        weektemphi = rows[0]
+
+        # weekly temp high
+        sql = "SELECT tempchi FROM wxrecords WHERE pwsid = %s AND year(timestamp)=YEAR(NOW()) AND tempchi IS NOT NULL "\
+              "ORDER BY timestamp DESC Limit 1";
+        value = (pwsid, )
+        db.execute(sql, value)
+        rows = db.fetchone()
+
+        if not rows:
+            return error_msg("no weather data found: is weather station online?")
+
+        yeartemphi = rows[0]
+
+        return render_template("temperature.html", pwsid=pwsid, currentwx=currentwx, todaytemphi=todaytemphi,\
+               todaytemplo=todaytemplo, weektemphi=weektemphi, yeartemphi=yeartemphi)
+
 @app.route("/addpws", methods=["GET", "POST"])
 @login_required
 def addpws():

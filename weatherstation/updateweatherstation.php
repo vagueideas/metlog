@@ -7,7 +7,7 @@
 //
 
 // Print debugging information if True
-$debug_mode = True; 
+$debug_mode = true;
 
 // include this php file to read system log files
 include 'tail.php';
@@ -88,7 +88,7 @@ function wxrecord($saved_var, $current_var, $current, $pwsid) {
         while($row = mysqli_fetch_assoc($result)) {
         
             if ($debug_mode == True) {
-                echo "<br>id: " . $row["id"]. " - value: " . $row[$saved_var]. " - pwsid: " . $pwsid . "<br>";
+                echo "<br>id: " . $row["id"]. " - value: " . $row[$saved_var]. " - pwsid: " . $pwsid;
             }
             
             # saved value from the db, if new record then delete that row with this id 
@@ -124,7 +124,6 @@ function wxrecord($saved_var, $current_var, $current, $pwsid) {
             if ($compare) {
             
                 if ($debug_mode == True) {
-
                   echo "<br>New record!";
                 }
             
@@ -241,7 +240,9 @@ $rainmm = round($_GET["rainin"] * 25.4, 1) * 10;
 $dailyrainmm = round($_GET["dailyrainin"] * 25.4, 1) * 10;
 
 
-echo "<h1>weather pws data capture</h1>";
+if ($debug_mode == True) {
+    echo "<h1>weather pws data capture</h1>";
+}
 
 // Weathercloud wid and wunderground id must match
 $wid = $pwsid;
