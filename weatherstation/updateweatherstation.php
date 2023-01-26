@@ -1,7 +1,7 @@
 <?php
 
 // 
-// updateweatherstation.php v 0.3 - captures data sent by PWS and inserts into database
+// updateweatherstation.php v 0.4 - captures data sent by PWS and inserts into database
 // CS50 Final project
 // phil davis Jan 2023
 //
@@ -124,8 +124,8 @@ if ($debug_mode == True) {
     echo "weathercloud baro: " . ($barohpa) , " hpa";
     echo "<br>";
     echo "<h2>Converted data from wunderground</h2>";
-    echo "user: " . $user . "<br>";
-    echo "password: " . $password . "<br>";
+    echo "pwsid: " . $pwsid . "<br>";
+    echo "pwskey: " . $pwskey . "<br>";
     echo "baro in inhg: " . $baroinhg . " (not used)<br>";
     echo "temp (F): " . $_GET['tempf'] . ", temp (C): . " . $tempc . "<br>";
     echo "indoor temp (F): " . $_GET['indoortempf'] . ", temp (C): . " . $intempc . "<br>";
@@ -244,6 +244,76 @@ if ($debug_mode == True) {
       echo "Error: " . $sql . "<br>" . mysqli_error($conn);
     }
 }
+
+// Check and set weather records
+// This are for each day
+// === records ===
+// = tempchi
+// = tempclo
+// = intempchi
+// = intempclo
+// = windspeedmshi
+// = windgustmshi
+// = rainmmhi
+// = dailyrainmmhi
+
+// To set a record, get the values from the records table for today, if the current value 
+// is higher, update the record
+
+function wxrecord($saved_var, $current_var, $current, $pwsid) {
+
+    global $debug_mode;
+    global $conn;
+        
+    if ($debug_mode == True) {
+        echo "<h2>Getting and setting weather records</h2>";
+    }
+
+    // get record from the db
+    $sql = "SELECT $saved_var FROM wxrecords WHERE pwsid=\"$pwsid\" AND date(timestamp)=curdate()";
+
+        if ($debug_mode == True) {
+            echo "<br>db query: " . $sql;
+        }
+
+    $saved = mysqli_query($conn, $sql);
+
+    //echo $saved . "<br>";
+
+    if (mysqli_num_rows($saved) == 0) {
+         $sql = "INSERT INTO wxrecords (pwsid, $saved_var) VALUES (\"$pwsid\", $current)";
+    } else { 
+        $sql = "UPDATE wxrecords SET $saved_var = $current WHERE pwsid=\"$pwsid\" AND date(timestamp)=curdate()";
+    }
+
+    if ($debug_mode == True) {
+        echo "<br>db query: " . $sql;
+    }
+
+    if ($current > $saved) {
+        # if new record, insert new high record into db
+        // $sql = "UPDATE wxrecords SET ($saved_var) WHERE pwsid=$pwsid AND date(timestamp)=curdate() VALUES ($current)";
+
+        if ($debug_mode == True) {
+            echo "<br>db query: " . $sql;
+        }
+
+        echo "<br>";
+
+        if ($debug_mode == True) {
+            if (mysqli_query($conn, $sql)) {
+              echo "New record created successfully";
+            } else {
+              echo "Error: " . $sql . "<br>" . mysqli_error($conn);
+            }
+        }
+    }
+}
+
+// params: name of saved value, name of current value, current value
+wxrecord("tempchi", "tempc", $tempc, $pwsid);
+wxrecord("intempchi", "intempc", $intempc, $pwsid);
+wxrecord("windspeedmshi", "windspeedms", $windspeedms, $pwsid);
 
 mysqli_close($conn);
 
