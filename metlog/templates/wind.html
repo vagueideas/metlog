@@ -1,0 +1,76 @@
+{% extends "layout.html" %}
+
+{% block title %}
+     - wind
+{% endblock %}
+
+{% block main %}
+
+    <h1>wind</h1>
+    <h2>{{ pwsid }}</h2>
+    <br>
+
+    <!-- display some gaugues -->
+    <div class="container text-center">
+      <div class="row">
+        <div class="col">
+            <h3>wind speed: {{ currentwx.windspeedms / 100 }} m/s</h3>
+
+            <!-- https://www.jqueryscript.net/chart-graph/Customizable-Animated-jQuery-HTML5-Gauge-Meter-Plugin.html -->
+            <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script> 
+            <script src="static/js/GaugeMeter.js"></script> 
+            
+            <div class="GaugeMeter" id="PreviewGaugeMeter_2" data-percent="{{ (currentwx.windspeedms / 100) | round | int  }}" data-append="m/s" data-size="200" data-theme="White" data-back="RGBa(0,0,0,.1)" data-animate_gauge_colors="1" data-animate_text_colors="1" data-width="15" data-label="wind speed" data-style="Arch" data-label_color="#FFF"></div>
+
+            <script>
+                $(".GaugeMeter").gaugeMeter();
+            </script>
+
+            <table class="table text-start">
+              <tr>
+                <th>&nbsp;</th>
+                <th>today</td>
+                <th>this week</th>
+                <th>this year</th>
+              </tr>
+              <tr>
+                <td>high</td>
+                <td>{{ wxrecords.todaywindspeedmshi / 100 }} m/s</td>
+                <td>{{ wxrecords.weekwindspeedmshi / 100 }} m/s</td>
+                <td>{{ wxrecords.yearwindspeedmshi / 100 }} m/s</td>
+              </tr>
+            </table>
+
+        </div>      
+
+        <div class="col">
+            <h3>gust: {{ currentwx.windgustms / 100  }} m/s</h3>
+
+            <div class="GaugeMeter" id="PreviewGaugeMeter_2" data-percent="{{ (currentwx.windgustms / 100) | round | int  }}" data-append="m/s" data-size="200" data-theme="White" data-back="RGBa(0,0,0,.1)" data-animate_gauge_colors="1" data-animate_text_colors="1" data-width="15" data-label="wind speed" data-style="Arch" data-label_color="#FFF"></div>
+
+            <script>
+                $(".GaugeMeter").gaugeMeter();
+            </script>
+
+            <table class="table text-start">
+              <tr>
+                <th>&nbsp;</th>
+                <th>today</td>
+                <th>this week</th>
+                <th>this year</th>
+              </tr>
+              <tr>
+                <td>high</td>
+                <td>{{ wxrecords.todaywindgustmshi / 100 }} m/s</td>
+                <td>{{ wxrecords.weekwindgustmshi / 100 }} m/s</td>
+                <td>{{ wxrecords.yearwindgustmshi / 100 }} m/s</td>
+              </tr>
+            </table>
+
+        
+        </div>
+
+      </div>    
+    </div>
+
+{% endblock %}
