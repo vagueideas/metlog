@@ -19,6 +19,18 @@ mydb = mysql.connector.connect(
 # Get db ready
 db = mydb.cursor()
 
+# make sql queries and return single weather data
+def wxquery(query, pwsid):
+    sql = query
+    value = (pwsid, )
+    db.execute(sql, value)
+    rows = db.fetchone()
+    
+    if not rows:
+        return error_msg("no weather data found: is weather station online?")
+    
+    return rows[0]
+
 # Home page
 @app.route("/")
 @login_required
@@ -112,7 +124,7 @@ def temperature():
         rows = db.fetchall()
 
         if not rows:
-            return error_msg("no weather data found: is weather station online?")
+            return error_msg("today's weather data found: is weather station online?")
 
         # put this into a dict:
         currentwx = {'pwsid': rows[0][0], 'pwskey': rows[0][1], 'timestamp': rows[0][2], 'barohpa': rows[0][3],\
@@ -122,7 +134,7 @@ def temperature():
 
         # Today's temp high
         sql = "SELECT tempchi FROM wxrecords WHERE pwsid = %s AND date(timestamp)=curdate() AND tempchi IS NOT NULL "\
-              "ORDER BY timestamp DESC Limit 1";
+              "ORDER BY tempchi DESC Limit 1";
         value = (pwsid, )
         db.execute(sql, value)
         rows = db.fetchone()
@@ -134,7 +146,7 @@ def temperature():
 
         # Today's temp low
         sql = "SELECT tempclo FROM wxrecords WHERE pwsid = %s AND date(timestamp)=curdate() AND tempclo IS NOT NULL "\
-              "ORDER BY timestamp ASC Limit 1";
+              "ORDER BY tempclo ASC Limit 1";
         value = (pwsid, )
         db.execute(sql, value)
         rows = db.fetchone()
@@ -146,7 +158,7 @@ def temperature():
 
         # weekly temp high
         sql = "SELECT tempchi FROM wxrecords WHERE pwsid = %s AND yearweek(timestamp)=YEARWEEK(NOW()) AND tempchi IS NOT NULL "\
-              "ORDER BY timestamp DESC Limit 1";
+              "ORDER BY tempchi DESC Limit 1";
         value = (pwsid, )
         db.execute(sql, value)
         rows = db.fetchone()
@@ -156,20 +168,23 @@ def temperature():
 
         weektemphi = rows[0]
 
-        # weekly temp high
+        # weekly temp low
+        weektemplo = wxquery("SELECT tempclo FROM wxrecords WHERE pwsid = %s AND yearweek(timestamp)=YEARWEEK(NOW()) AND tempclo IS NOT NULL ORDER BY tempclo ASC Limit 1", pwsid)
+
+        # yearly temp high
         sql = "SELECT tempchi FROM wxrecords WHERE pwsid = %s AND year(timestamp)=YEAR(NOW()) AND tempchi IS NOT NULL "\
-              "ORDER BY timestamp DESC Limit 1";
+              "ORDER BY tempchi DESC Limit 1";
         value = (pwsid, )
         db.execute(sql, value)
         rows = db.fetchone()
 
-        if not rows:
-            return error_msg("no weather data found: is weather station online?")
-
         yeartemphi = rows[0]
 
+        # yearly temp low
+        yeartemplo = wxquery("SELECT tempclo FROM wxrecords WHERE pwsid = %s AND year(timestamp)=YEAR(NOW()) AND tempclo IS NOT NULL ORDER BY tempclo ASC Limit 1", pwsid)
+
         return render_template("temperature.html", pwsid=pwsid, currentwx=currentwx, todaytemphi=todaytemphi,\
-               todaytemplo=todaytemplo, weektemphi=weektemphi, yeartemphi=yeartemphi)
+               todaytemplo=todaytemplo, weektemphi=weektemphi, weektemplo=weektemplo, yeartemphi=yeartemphi, yeartemplo=yeartemplo)
 
 @app.route("/addpws", methods=["GET", "POST"])
 @login_required
