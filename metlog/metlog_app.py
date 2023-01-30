@@ -27,7 +27,7 @@ def wxquery(query, pwsid):
     rows = db.fetchone()
     
     if not rows:
-        return error_msg("no weather data found: is weather station online?")
+        return False
     
     return rows[0]
 
@@ -124,7 +124,7 @@ def temperature():
         rows = db.fetchall()
 
         if not rows:
-            return error_msg("today's weather data found: is weather station online?")
+            return error_msg("today's weather data not found: is weather station online?")
 
         # put this into a dict:
         currentwx = {'pwsid': rows[0][0], 'pwskey': rows[0][1], 'timestamp': rows[0][2], 'barohpa': rows[0][3],\
@@ -148,6 +148,10 @@ def temperature():
         'yearintemphi': wxquery("SELECT intempchi FROM wxrecords WHERE pwsid = %s AND year(timestamp)=YEAR(NOW()) AND intempchi IS NOT NULL ORDER BY intempchi DESC Limit 1", pwsid),
         'yearintemplo': wxquery("SELECT intempclo FROM wxrecords WHERE pwsid = %s AND year(timestamp)=YEAR(NOW()) AND intempclo IS NOT NULL ORDER BY intempclo ASC Limit 1", pwsid)
         }
+
+        # Quick check, not totally robust
+        if (wxrecords['todaytemphi'] == False):
+            return error_msg("weather data not found, is weather station online?")
 
         # Send data to web page
         return render_template("temperature.html", pwsid=pwsid, currentwx=currentwx, wxrecords=wxrecords)
@@ -193,6 +197,10 @@ def wind():
         'yearwindgustmshi': wxquery("SELECT windgustmshi FROM wxrecords WHERE pwsid = %s AND year(timestamp)=YEAR(NOW()) AND windgustmshi IS NOT NULL ORDER BY windgustmshi DESC Limit 1", pwsid),
         }
 
+        # Quick check, not totally robust but at least checks if some of today's date is missing
+        if (wxrecords['todaywindspeedmshi'] == False):
+            return error_msg("weather data not found, is weather station online?")
+
         # Send data to web page
         return render_template("wind.html", pwsid=pwsid, currentwx=currentwx, wxrecords=wxrecords)
         
@@ -235,6 +243,10 @@ def rain():
         'weekdailyrainmmhi': wxquery("SELECT dailyrainmmhi FROM wxrecords WHERE pwsid = %s AND yearweek(timestamp)=YEARWEEK(NOW()) AND dailyrainmmhi IS NOT NULL ORDER BY dailyrainmmhi DESC Limit 1", pwsid),
         'yeardailyrainmmhi': wxquery("SELECT dailyrainmmhi FROM wxrecords WHERE pwsid = %s AND year(timestamp)=YEAR(NOW()) AND dailyrainmmhi IS NOT NULL ORDER BY dailyrainmmhi DESC Limit 1", pwsid),
         }
+
+        # Quick check, not totally robust but at least checks if some of today's date is missing
+        if (wxrecords['todayrainmmhi'] == False):
+            return error_msg("weather data not found, is weather station online?")
 
         # Send data to web page
         return render_template("rain.html", pwsid=pwsid, currentwx=currentwx, wxrecords=wxrecords)
