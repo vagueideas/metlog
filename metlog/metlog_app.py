@@ -243,7 +243,7 @@ def rain():
 @app.route("/addpws", methods=["GET", "POST"])
 @login_required
 def addpws():
-    """ settings page """
+    """ add pws page """
 
     if request.method == "POST":
 
@@ -274,6 +274,39 @@ def addpws():
     else:
         return render_template("add.html")
     
+@app.route("/settings", methods=["GET", "POST"])
+@login_required
+def settings():
+    """ settings page """
+
+    if request.method == "POST":
+
+        # Get form data
+        pwsid = request.form.get("pwsid")
+        name = request.form.get("name")
+        description = request.form.get("description")
+        lat = request.form.get("lat")
+        lng = request.form.get("lng")
+        height = request.form.get("height")
+        wid = request.form.get("wid")
+        wkey = request.form.get("wkey")
+        wuid = request.form.get("wuid")
+        wupass = request.form.get("wupass")
+
+        # Set user id as pwd owner
+        userid = session["user_id"]
+
+        # Insert all values into db
+        sql = "INSERT INTO pws (userid, pwsid, name, description, lat, lng, height, wid, wkey, wuid, wupass)"\
+               "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+        values =  (userid, pwsid, name, description, lat, lng, height, wid, wkey, wuid, wupass) 
+        db.execute(sql, values)
+        mydb.commit()
+
+        return info_msg("weather station added!")
+
+    else:
+        return render_template("settings.html")
     
 @app.route("/login", methods=["GET", "POST"])
 def login():

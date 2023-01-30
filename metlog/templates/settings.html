@@ -1,0 +1,47 @@
+{% extends "layout.html" %}
+
+{% block title %}
+     - change pws settings
+{% endblock %}
+
+{% block main %}
+
+    <h1>update weather station settings</h1>
+    <br>
+
+    <form action="/addpws" method="post">
+        <div class="mb-3">
+            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="pwsid" name="pwsid" placeholder="weather station id (required)" type="text">
+        </div>
+        <div class="mb-3">
+            <input class="form-control mx-auto w-auto" id="name" name="name" placeholder="name" type="text">
+        </div>
+        <div class="mb-3">
+            <input class="form-control mx-auto w-auto" id="description" name="description" placeholder="description" type="text">
+        </div>
+        <div class="mb-3">
+            <input class="form-control mx-auto w-auto" id="lat" name="lat" placeholder="lat" type="text">
+        </div>
+        <div class="mb-3">
+            <input class="form-control mx-auto w-auto" id="lng" name="lng" placeholder="long" type="text">
+        </div>
+        <div class="mb-3">
+            <input class="form-control mx-auto w-auto" id="height" name="height" placeholder="height" type="text">
+        </div>
+        <div class="mb-3">
+            <input class="form-control mx-auto w-auto" id="wid" name="wid" placeholder="weathercloud id" type="text">
+        </div>
+        <div class="mb-3">
+            <input class="form-control mx-auto w-auto" id="wkey" name="wkey" placeholder="weathercloud key" type="text">
+        </div>
+        <div class="mb-3">
+            <input class="form-control mx-auto w-auto" id="wuid" name="wuid" placeholder="wunderground id" type="text">
+        </div>
+        <div class="mb-3">
+            <input class="form-control mx-auto w-auto" id="wupass" name="wupass" placeholder="wunderground password" type="text">
+        </div>
+        <button class="btn btn-dark" type="submit">submit</button>
+    </form>
+
+
+{% endblock %}
