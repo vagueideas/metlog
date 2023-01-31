@@ -6,39 +6,39 @@
 
 {% block main %}
 
-    <h1>update weather station settings</h1>
+    <h1>update settings for {{ session["curpws"] }}</h1>
     <br>
 
-    <form action="/addpws" method="post">
+    <form action="/settings" method="post">
         <div class="mb-3">
-            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="pwsid" name="pwsid" placeholder="weather station id (required)" type="text">
+            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="pwsid" name="pwsid" value="{{ pwsid }}" type="text">
         </div>
         <div class="mb-3">
-            <input class="form-control mx-auto w-auto" id="name" name="name" placeholder="name" type="text">
+            <input class="form-control mx-auto w-auto" id="name" name="name" value="{{ name }}" type="text">
         </div>
         <div class="mb-3">
-            <input class="form-control mx-auto w-auto" id="description" name="description" placeholder="description" type="text">
+            <input class="form-control mx-auto w-auto" id="description" name="description" value="{{ description }}" type="text">
         </div>
         <div class="mb-3">
-            <input class="form-control mx-auto w-auto" id="lat" name="lat" placeholder="lat" type="text">
+            <input class="form-control mx-auto w-auto" id="lat" name="lat" value="{{ lat }}" type="text">
         </div>
         <div class="mb-3">
-            <input class="form-control mx-auto w-auto" id="lng" name="lng" placeholder="long" type="text">
+            <input class="form-control mx-auto w-auto" id="lng" name="lng" value="{{ lng }}" type="text">
         </div>
         <div class="mb-3">
-            <input class="form-control mx-auto w-auto" id="height" name="height" placeholder="height" type="text">
+            <input class="form-control mx-auto w-auto" id="height" name="height" value="{{ height }}" type="text">
         </div>
         <div class="mb-3">
-            <input class="form-control mx-auto w-auto" id="wid" name="wid" placeholder="weathercloud id" type="text">
+            <input class="form-control mx-auto w-auto" id="wid" name="wid" value="{{ wid }}" type="text">
         </div>
         <div class="mb-3">
-            <input class="form-control mx-auto w-auto" id="wkey" name="wkey" placeholder="weathercloud key" type="text">
+            <input class="form-control mx-auto w-auto" id="wkey" name="wkey" value="{{ wkey }}" type="text">
         </div>
         <div class="mb-3">
-            <input class="form-control mx-auto w-auto" id="wuid" name="wuid" placeholder="wunderground id" type="text">
+            <input class="form-control mx-auto w-auto" id="wuid" name="wuid" value="{{ wuid }}" type="text">
         </div>
         <div class="mb-3">
-            <input class="form-control mx-auto w-auto" id="wupass" name="wupass" placeholder="wunderground password" type="text">
+            <input class="form-control mx-auto w-auto" id="wupass" name="wupass" value="{{ wupass }}" type="text">
         </div>
         <button class="btn btn-dark" type="submit">submit</button>
     </form>

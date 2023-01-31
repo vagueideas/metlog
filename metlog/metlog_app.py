@@ -31,11 +31,30 @@ def wxquery(query, pwsid):
     
     return rows[0]
 
+# get the username
+def user():
+    # Get user id...
+    userid = session["user_id"]
+
+    # Get user id and set for session
+    sql = "SELECT user FROM users WHERE id = %s"
+    value = (userid, )
+    db.execute(sql, value)
+    rows = db.fetchone()
+
+    return rows[0]
+
 # Home page
-@app.route("/")
+@app.route("/", methods=["GET", "POST"])
 @login_required
 def index():
     # Show current weather conditions
+
+    curpws = "none"
+
+    if request.method == "POST":
+        curpws = request.form.get("pwsid")
+        session["curpws"] = curpws
 
     # Get user id...
     userid = session["user_id"]
@@ -71,7 +90,7 @@ def index():
             pwsinfo = {'id': id, 'pwsid': pwsid, 'description': description}
             pws.append(pwsinfo)
 
-    return render_template("index.html", user=user, rows=rows, pws=pws)
+    return render_template("index.html", user=user, rows=rows, pws=pws, curpws=curpws)
 
 @app.route("/current", methods=["GET", "POST"])
 @login_required
@@ -79,29 +98,30 @@ def current():
     """ show the current weather conditions """
 
     if request.method == "GET":
+        pwsid = session["curpws"]
         # allow user to select pws
-        return info_msg("no weather station selected")
+        # return info_msg("no weather station selected")
 
     else:
         # Get weather station id
         pwsid = request.form.get("pwsid")
 
-        # Get the weather from this pws
-        sql = "SELECT pwsid, pwskey, timestamp, barohpa, tempc, intempc, dewptc, humidity, inhumidity, windspeedms,"\
-              "windgustms, winddir, rainmm, dailyrainmm FROM snapshot WHERE pwsid = %s ORDER BY timestamp DESC LIMIT 1";
-        value = (pwsid, )
-        db.execute(sql, value)
-        rows = db.fetchall()
+    # Get the weather from this pws
+    sql = "SELECT pwsid, pwskey, timestamp, barohpa, tempc, intempc, dewptc, humidity, inhumidity, windspeedms,"\
+          "windgustms, winddir, rainmm, dailyrainmm FROM snapshot WHERE pwsid = %s ORDER BY timestamp DESC LIMIT 1";
+    value = (pwsid, )
+    db.execute(sql, value)
+    rows = db.fetchall()
 
-        if not rows:
-            return error_msg("no weather data found: is weather station online?")
+    if not rows:
+        return error_msg("no weather data found: is weather station online?")
 
-        # put this into a dict:
-        currentwx = {'pwsid': rows[0][0], 'pwskey': rows[0][1], 'timestamp': rows[0][2], 'barohpa': rows[0][3],\
-                 'tempc': rows[0][4], 'intempc': rows[0][5], 'dewptc': rows[0][6], 'humidity': rows[0][7],\
-                 'inhumidity': rows[0][8], 'windspeedms': rows[0][9], 'windgustms': rows[0][10],\
-                  'winddir': rows[0][11], 'rainmm': rows[0][12], 'dailyrainmm': rows[0][13]}
-        return render_template("current.html", pwsid=pwsid, currentwx=currentwx)
+    # put this into a dict:
+    currentwx = {'pwsid': rows[0][0], 'pwskey': rows[0][1], 'timestamp': rows[0][2], 'barohpa': rows[0][3],\
+             'tempc': rows[0][4], 'intempc': rows[0][5], 'dewptc': rows[0][6], 'humidity': rows[0][7],\
+             'inhumidity': rows[0][8], 'windspeedms': rows[0][9], 'windgustms': rows[0][10],\
+              'winddir': rows[0][11], 'rainmm': rows[0][12], 'dailyrainmm': rows[0][13]}
+    return render_template("current.html", pwsid=pwsid, currentwx=currentwx, user=user())
 
 @app.route("/temperature", methods=["GET", "POST"])
 @login_required
@@ -109,47 +129,51 @@ def temperature():
     """ show the temperature info """
 
     if request.method == "GET":
+        pwsid = session["curpws"]
         # allow user to select pws
-        return info_msg("no weather station selected")
+        #return info_msg("no weather station selected")
 
     else:
         # Get weather station id
         pwsid = request.form.get("pwsid")
 
-        # Get the weather from this pws
-        sql = "SELECT pwsid, pwskey, timestamp, barohpa, tempc, intempc, dewptc, humidity, inhumidity, windspeedms,"\
-              "windgustms, winddir, rainmm, dailyrainmm FROM snapshot WHERE pwsid = %s ORDER BY timestamp DESC LIMIT 1";
-        value = (pwsid, )
-        db.execute(sql, value)
-        rows = db.fetchall()
+    # Get the weather from this pws
+    sql = "SELECT pwsid, pwskey, timestamp, barohpa, tempc, intempc, dewptc, humidity, inhumidity, windspeedms,"\
+          "windgustms, winddir, rainmm, dailyrainmm FROM snapshot WHERE pwsid = %s ORDER BY timestamp DESC LIMIT 1";
+    value = (pwsid, )
+    db.execute(sql, value)
+    rows = db.fetchall()
 
-        if not rows:
-            return error_msg("today's weather data not found: is weather station online?")
+    if not rows:
+        return error_msg("weather data not found: is weather station properly configured and online?")
 
-        # put this into a dict:
-        currentwx = {'pwsid': rows[0][0], 'pwskey': rows[0][1], 'timestamp': rows[0][2], 'barohpa': rows[0][3],\
-                 'tempc': rows[0][4], 'intempc': rows[0][5], 'dewptc': rows[0][6], 'humidity': rows[0][7],\
-                 'inhumidity': rows[0][8], 'windspeedms': rows[0][9], 'windgustms': rows[0][10],\
-                  'winddir': rows[0][11], 'rainmm': rows[0][12], 'dailyrainmm': rows[0][13]}
+    # put this into a dict:
+    currentwx = {'pwsid': rows[0][0], 'pwskey': rows[0][1], 'timestamp': rows[0][2], 'barohpa': rows[0][3],\
+             'tempc': rows[0][4], 'intempc': rows[0][5], 'dewptc': rows[0][6], 'humidity': rows[0][7],\
+             'inhumidity': rows[0][8], 'windspeedms': rows[0][9], 'windgustms': rows[0][10],\
+              'winddir': rows[0][11], 'rainmm': rows[0][12], 'dailyrainmm': rows[0][13]}
 
-        # Query daily, weekly and yearly records and put into dict
-        wxrecords = {
-        'todaytemphi': wxquery("SELECT tempchi FROM wxrecords WHERE pwsid = %s AND date(timestamp)=curdate() AND tempchi IS NOT NULL ORDER BY tempchi DESC Limit 1", pwsid),
-        'todaytemplo': wxquery("SELECT tempclo FROM wxrecords WHERE pwsid = %s AND date(timestamp)=curdate() AND tempclo IS NOT NULL ORDER BY tempclo ASC Limit 1", pwsid),
-        'weektemphi': wxquery("SELECT tempchi FROM wxrecords WHERE pwsid = %s AND yearweek(timestamp)=YEARWEEK(NOW()) AND tempchi IS NOT NULL ORDER BY tempchi DESC Limit 1", pwsid),
-        'weektemplo': wxquery("SELECT tempclo FROM wxrecords WHERE pwsid = %s AND yearweek(timestamp)=YEARWEEK(NOW()) AND tempclo IS NOT NULL ORDER BY tempclo ASC Limit 1", pwsid),
-        'yeartemphi': wxquery("SELECT tempchi FROM wxrecords WHERE pwsid = %s AND year(timestamp)=YEAR(NOW()) AND tempchi IS NOT NULL ORDER BY tempchi DESC Limit 1", pwsid),
-        'yeartemplo': wxquery("SELECT tempclo FROM wxrecords WHERE pwsid = %s AND year(timestamp)=YEAR(NOW()) AND tempclo IS NOT NULL ORDER BY tempclo ASC Limit 1", pwsid),
-        'todayintemphi': wxquery("SELECT intempchi FROM wxrecords WHERE pwsid = %s AND date(timestamp)=curdate() AND intempchi IS NOT NULL ORDER BY intempchi DESC Limit 1", pwsid),
-        'todayintemplo': wxquery("SELECT intempclo FROM wxrecords WHERE pwsid = %s AND date(timestamp)=curdate() AND intempclo IS NOT NULL ORDER BY intempclo ASC Limit 1", pwsid),
-        'weekintemphi': wxquery("SELECT intempchi FROM wxrecords WHERE pwsid = %s AND yearweek(timestamp)=YEARWEEK(NOW()) AND intempchi IS NOT NULL ORDER BY intempchi DESC Limit 1", pwsid),
-        'weekintemplo': wxquery("SELECT intempclo FROM wxrecords WHERE pwsid = %s AND yearweek(timestamp)=YEARWEEK(NOW()) AND intempclo IS NOT NULL ORDER BY intempclo ASC Limit 1", pwsid),
-        'yearintemphi': wxquery("SELECT intempchi FROM wxrecords WHERE pwsid = %s AND year(timestamp)=YEAR(NOW()) AND intempchi IS NOT NULL ORDER BY intempchi DESC Limit 1", pwsid),
-        'yearintemplo': wxquery("SELECT intempclo FROM wxrecords WHERE pwsid = %s AND year(timestamp)=YEAR(NOW()) AND intempclo IS NOT NULL ORDER BY intempclo ASC Limit 1", pwsid)
-        }
+    # Query daily, weekly and yearly records and put into dict
+    wxrecords = {
+    'todaytemphi': wxquery("SELECT tempchi FROM wxrecords WHERE pwsid = %s AND date(timestamp)=curdate() AND tempchi IS NOT NULL ORDER BY tempchi DESC Limit 1", pwsid),
+    'todaytemplo': wxquery("SELECT tempclo FROM wxrecords WHERE pwsid = %s AND date(timestamp)=curdate() AND tempclo IS NOT NULL ORDER BY tempclo ASC Limit 1", pwsid),
+    'weektemphi': wxquery("SELECT tempchi FROM wxrecords WHERE pwsid = %s AND yearweek(timestamp)=YEARWEEK(NOW()) AND tempchi IS NOT NULL ORDER BY tempchi DESC Limit 1", pwsid),
+    'weektemplo': wxquery("SELECT tempclo FROM wxrecords WHERE pwsid = %s AND yearweek(timestamp)=YEARWEEK(NOW()) AND tempclo IS NOT NULL ORDER BY tempclo ASC Limit 1", pwsid),
+    'yeartemphi': wxquery("SELECT tempchi FROM wxrecords WHERE pwsid = %s AND year(timestamp)=YEAR(NOW()) AND tempchi IS NOT NULL ORDER BY tempchi DESC Limit 1", pwsid),
+    'yeartemplo': wxquery("SELECT tempclo FROM wxrecords WHERE pwsid = %s AND year(timestamp)=YEAR(NOW()) AND tempclo IS NOT NULL ORDER BY tempclo ASC Limit 1", pwsid),
+    'todayintemphi': wxquery("SELECT intempchi FROM wxrecords WHERE pwsid = %s AND date(timestamp)=curdate() AND intempchi IS NOT NULL ORDER BY intempchi DESC Limit 1", pwsid),
+    'todayintemplo': wxquery("SELECT intempclo FROM wxrecords WHERE pwsid = %s AND date(timestamp)=curdate() AND intempclo IS NOT NULL ORDER BY intempclo ASC Limit 1", pwsid),
+    'weekintemphi': wxquery("SELECT intempchi FROM wxrecords WHERE pwsid = %s AND yearweek(timestamp)=YEARWEEK(NOW()) AND intempchi IS NOT NULL ORDER BY intempchi DESC Limit 1", pwsid),
+    'weekintemplo': wxquery("SELECT intempclo FROM wxrecords WHERE pwsid = %s AND yearweek(timestamp)=YEARWEEK(NOW()) AND intempclo IS NOT NULL ORDER BY intempclo ASC Limit 1", pwsid),
+    'yearintemphi': wxquery("SELECT intempchi FROM wxrecords WHERE pwsid = %s AND year(timestamp)=YEAR(NOW()) AND intempchi IS NOT NULL ORDER BY intempchi DESC Limit 1", pwsid),
+    'yearintemplo': wxquery("SELECT intempclo FROM wxrecords WHERE pwsid = %s AND year(timestamp)=YEAR(NOW()) AND intempclo IS NOT NULL ORDER BY intempclo ASC Limit 1", pwsid)
+    }
 
-        # Send data to web page
-        return render_template("temperature.html", pwsid=pwsid, currentwx=currentwx, wxrecords=wxrecords)
+    if wxrecords.get("todaytemphi") == False:
+        return info_msg("today's weather data not found, is weather station online?")
+
+    # Send data to web page
+    return render_template("temperature.html", pwsid=pwsid, currentwx=currentwx, wxrecords=wxrecords, user=user())
 
 
 @app.route("/wind", methods=["GET", "POST"])
@@ -158,42 +182,43 @@ def wind():
     """ show the wind info """
 
     if request.method == "GET":
+        pwsid = session["curpws"]
         # allow user to select pws
-        return info_msg("no weather station selected")
+        # return info_msg("no weather station selected")
 
     else:
         # Get weather station id
         pwsid = request.form.get("pwsid")
 
-        # Get the weather from this pws
-        sql = "SELECT pwsid, pwskey, timestamp, barohpa, tempc, intempc, dewptc, humidity, inhumidity, windspeedms,"\
-              "windgustms, winddir, rainmm, dailyrainmm FROM snapshot WHERE pwsid = %s ORDER BY timestamp DESC LIMIT 1";
-        value = (pwsid, )
-        db.execute(sql, value)
-        rows = db.fetchall()
+    # Get the weather from this pws
+    sql = "SELECT pwsid, pwskey, timestamp, barohpa, tempc, intempc, dewptc, humidity, inhumidity, windspeedms,"\
+          "windgustms, winddir, rainmm, dailyrainmm FROM snapshot WHERE pwsid = %s ORDER BY timestamp DESC LIMIT 1";
+    value = (pwsid, )
+    db.execute(sql, value)
+    rows = db.fetchall()
 
-        if not rows:
-            return error_msg("today's weather data found: is weather station online?")
+    if not rows:
+        return error_msg("today's weather data found: is weather station online?")
 
-        # put this into a dict:
-        currentwx = {'pwsid': rows[0][0], 'pwskey': rows[0][1], 'timestamp': rows[0][2], 'barohpa': rows[0][3],\
-                 'tempc': rows[0][4], 'intempc': rows[0][5], 'dewptc': rows[0][6], 'humidity': rows[0][7],\
-                 'inhumidity': rows[0][8], 'windspeedms': rows[0][9], 'windgustms': rows[0][10],\
-                  'winddir': rows[0][11], 'rainmm': rows[0][12], 'dailyrainmm': rows[0][13]}
+    # put this into a dict:
+    currentwx = {'pwsid': rows[0][0], 'pwskey': rows[0][1], 'timestamp': rows[0][2], 'barohpa': rows[0][3],\
+             'tempc': rows[0][4], 'intempc': rows[0][5], 'dewptc': rows[0][6], 'humidity': rows[0][7],\
+             'inhumidity': rows[0][8], 'windspeedms': rows[0][9], 'windgustms': rows[0][10],\
+              'winddir': rows[0][11], 'rainmm': rows[0][12], 'dailyrainmm': rows[0][13]}
 
 
-        # Query daily, weekly and yearly records and put into dict
-        wxrecords = {
-        'todaywindspeedmshi': wxquery("SELECT windspeedmshi FROM wxrecords WHERE pwsid = %s AND date(timestamp)=curdate() AND windspeedmshi IS NOT NULL ORDER BY windspeedmshi DESC Limit 1", pwsid),
-        'weekwindspeedmshi': wxquery("SELECT windspeedmshi FROM wxrecords WHERE pwsid = %s AND yearweek(timestamp)=YEARWEEK(NOW()) AND windspeedmshi IS NOT NULL ORDER BY windspeedmshi DESC Limit 1", pwsid),
-        'yearwindspeedmshi': wxquery("SELECT windspeedmshi FROM wxrecords WHERE pwsid = %s AND year(timestamp)=YEAR(NOW()) AND windspeedmshi IS NOT NULL ORDER BY windspeedmshi DESC Limit 1", pwsid),
-        'todaywindgustmshi': wxquery("SELECT windgustmshi FROM wxrecords WHERE pwsid = %s AND date(timestamp)=curdate() AND windgustmshi IS NOT NULL ORDER BY windgustmshi DESC Limit 1", pwsid),
-        'weekwindgustmshi': wxquery("SELECT windgustmshi FROM wxrecords WHERE pwsid = %s AND yearweek(timestamp)=YEARWEEK(NOW()) AND windgustmshi IS NOT NULL ORDER BY windgustmshi DESC Limit 1", pwsid),
-        'yearwindgustmshi': wxquery("SELECT windgustmshi FROM wxrecords WHERE pwsid = %s AND year(timestamp)=YEAR(NOW()) AND windgustmshi IS NOT NULL ORDER BY windgustmshi DESC Limit 1", pwsid),
-        }
+    # Query daily, weekly and yearly records and put into dict
+    wxrecords = {
+    'todaywindspeedmshi': wxquery("SELECT windspeedmshi FROM wxrecords WHERE pwsid = %s AND date(timestamp)=curdate() AND windspeedmshi IS NOT NULL ORDER BY windspeedmshi DESC Limit 1", pwsid),
+    'weekwindspeedmshi': wxquery("SELECT windspeedmshi FROM wxrecords WHERE pwsid = %s AND yearweek(timestamp)=YEARWEEK(NOW()) AND windspeedmshi IS NOT NULL ORDER BY windspeedmshi DESC Limit 1", pwsid),
+    'yearwindspeedmshi': wxquery("SELECT windspeedmshi FROM wxrecords WHERE pwsid = %s AND year(timestamp)=YEAR(NOW()) AND windspeedmshi IS NOT NULL ORDER BY windspeedmshi DESC Limit 1", pwsid),
+    'todaywindgustmshi': wxquery("SELECT windgustmshi FROM wxrecords WHERE pwsid = %s AND date(timestamp)=curdate() AND windgustmshi IS NOT NULL ORDER BY windgustmshi DESC Limit 1", pwsid),
+    'weekwindgustmshi': wxquery("SELECT windgustmshi FROM wxrecords WHERE pwsid = %s AND yearweek(timestamp)=YEARWEEK(NOW()) AND windgustmshi IS NOT NULL ORDER BY windgustmshi DESC Limit 1", pwsid),
+    'yearwindgustmshi': wxquery("SELECT windgustmshi FROM wxrecords WHERE pwsid = %s AND year(timestamp)=YEAR(NOW()) AND windgustmshi IS NOT NULL ORDER BY windgustmshi DESC Limit 1", pwsid),
+    }
 
-        # Send data to web page
-        return render_template("wind.html", pwsid=pwsid, currentwx=currentwx, wxrecords=wxrecords)
+    # Send data to web page
+    return render_template("wind.html", pwsid=pwsid, currentwx=currentwx, wxrecords=wxrecords, user=user())
         
 @app.route("/rain", methods=["GET", "POST"])
 @login_required
@@ -201,42 +226,43 @@ def rain():
     """ show the rain info """
 
     if request.method == "GET":
+        pwsid = session["curpws"]
         # allow user to select pws
-        return info_msg("no weather station selected")
+        #return info_msg("no weather station selected")
 
     else:
         # Get weather station id
         pwsid = request.form.get("pwsid")
 
-        # Get the weather from this pws
-        sql = "SELECT pwsid, pwskey, timestamp, barohpa, tempc, intempc, dewptc, humidity, inhumidity, windspeedms,"\
-              "windgustms, winddir, rainmm, dailyrainmm FROM snapshot WHERE pwsid = %s ORDER BY timestamp DESC LIMIT 1";
-        value = (pwsid, )
-        db.execute(sql, value)
-        rows = db.fetchall()
+    # Get the weather from this pws
+    sql = "SELECT pwsid, pwskey, timestamp, barohpa, tempc, intempc, dewptc, humidity, inhumidity, windspeedms,"\
+          "windgustms, winddir, rainmm, dailyrainmm FROM snapshot WHERE pwsid = %s ORDER BY timestamp DESC LIMIT 1";
+    value = (pwsid, )
+    db.execute(sql, value)
+    rows = db.fetchall()
 
-        if not rows:
-            return error_msg("today's weather data found: is weather station online?")
+    if not rows:
+        return error_msg("today's weather data found: is weather station online?")
 
-        # put this into a dict:
-        currentwx = {'pwsid': rows[0][0], 'pwskey': rows[0][1], 'timestamp': rows[0][2], 'barohpa': rows[0][3],\
-                 'tempc': rows[0][4], 'intempc': rows[0][5], 'dewptc': rows[0][6], 'humidity': rows[0][7],\
-                 'inhumidity': rows[0][8], 'windspeedms': rows[0][9], 'windgustms': rows[0][10],\
-                  'winddir': rows[0][11], 'rainmm': rows[0][12], 'dailyrainmm': rows[0][13]}
+    # put this into a dict:
+    currentwx = {'pwsid': rows[0][0], 'pwskey': rows[0][1], 'timestamp': rows[0][2], 'barohpa': rows[0][3],\
+             'tempc': rows[0][4], 'intempc': rows[0][5], 'dewptc': rows[0][6], 'humidity': rows[0][7],\
+             'inhumidity': rows[0][8], 'windspeedms': rows[0][9], 'windgustms': rows[0][10],\
+              'winddir': rows[0][11], 'rainmm': rows[0][12], 'dailyrainmm': rows[0][13]}
 
 
-        # Query daily, weekly and yearly records and put into dict
-        wxrecords = {
-        'todayrainmmhi': wxquery("SELECT rainmmhi FROM wxrecords WHERE pwsid = %s AND date(timestamp)=curdate() AND rainmmhi IS NOT NULL ORDER BY rainmmhi DESC Limit 1", pwsid),
-        'weekrainmmhi': wxquery("SELECT rainmmhi FROM wxrecords WHERE pwsid = %s AND yearweek(timestamp)=YEARWEEK(NOW()) AND rainmmhi IS NOT NULL ORDER BY rainmmhi DESC Limit 1", pwsid),
-        'yearrainmmhi': wxquery("SELECT rainmmhi FROM wxrecords WHERE pwsid = %s AND year(timestamp)=YEAR(NOW()) AND rainmmhi IS NOT NULL ORDER BY rainmmhi DESC Limit 1", pwsid),
-        'todaydailyrainmmhi': wxquery("SELECT dailyrainmmhi FROM wxrecords WHERE pwsid = %s AND date(timestamp)=curdate() AND dailyrainmmhi IS NOT NULL ORDER BY dailyrainmmhi DESC Limit 1", pwsid),
-        'weekdailyrainmmhi': wxquery("SELECT dailyrainmmhi FROM wxrecords WHERE pwsid = %s AND yearweek(timestamp)=YEARWEEK(NOW()) AND dailyrainmmhi IS NOT NULL ORDER BY dailyrainmmhi DESC Limit 1", pwsid),
-        'yeardailyrainmmhi': wxquery("SELECT dailyrainmmhi FROM wxrecords WHERE pwsid = %s AND year(timestamp)=YEAR(NOW()) AND dailyrainmmhi IS NOT NULL ORDER BY dailyrainmmhi DESC Limit 1", pwsid),
-        }
+    # Query daily, weekly and yearly records and put into dict
+    wxrecords = {
+    'todayrainmmhi': wxquery("SELECT rainmmhi FROM wxrecords WHERE pwsid = %s AND date(timestamp)=curdate() AND rainmmhi IS NOT NULL ORDER BY rainmmhi DESC Limit 1", pwsid),
+    'weekrainmmhi': wxquery("SELECT rainmmhi FROM wxrecords WHERE pwsid = %s AND yearweek(timestamp)=YEARWEEK(NOW()) AND rainmmhi IS NOT NULL ORDER BY rainmmhi DESC Limit 1", pwsid),
+    'yearrainmmhi': wxquery("SELECT rainmmhi FROM wxrecords WHERE pwsid = %s AND year(timestamp)=YEAR(NOW()) AND rainmmhi IS NOT NULL ORDER BY rainmmhi DESC Limit 1", pwsid),
+    'todaydailyrainmmhi': wxquery("SELECT dailyrainmmhi FROM wxrecords WHERE pwsid = %s AND date(timestamp)=curdate() AND dailyrainmmhi IS NOT NULL ORDER BY dailyrainmmhi DESC Limit 1", pwsid),
+    'weekdailyrainmmhi': wxquery("SELECT dailyrainmmhi FROM wxrecords WHERE pwsid = %s AND yearweek(timestamp)=YEARWEEK(NOW()) AND dailyrainmmhi IS NOT NULL ORDER BY dailyrainmmhi DESC Limit 1", pwsid),
+    'yeardailyrainmmhi': wxquery("SELECT dailyrainmmhi FROM wxrecords WHERE pwsid = %s AND year(timestamp)=YEAR(NOW()) AND dailyrainmmhi IS NOT NULL ORDER BY dailyrainmmhi DESC Limit 1", pwsid),
+    }
 
-        # Send data to web page
-        return render_template("rain.html", pwsid=pwsid, currentwx=currentwx, wxrecords=wxrecords)
+    # Send data to web page
+    return render_template("rain.html", pwsid=pwsid, currentwx=currentwx, wxrecords=wxrecords, user=user())
 
 
 @app.route("/addpws", methods=["GET", "POST"])
@@ -271,7 +297,7 @@ def addpws():
         return info_msg("weather station added!")
 
     else:
-        return render_template("add.html")
+        return render_template("add.html", user=user())
     
 @app.route("/settings", methods=["GET", "POST"])
 @login_required
@@ -279,6 +305,7 @@ def settings():
     """ settings page """
 
     if request.method == "POST":
+        curpws = session["curpws"]
 
         # Get form data
         pwsid = request.form.get("pwsid")
@@ -296,16 +323,34 @@ def settings():
         userid = session["user_id"]
 
         # Insert all values into db
-        sql = "INSERT INTO pws (userid, pwsid, name, description, lat, lng, height, wid, wkey, wuid, wupass)"\
-               "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-        values =  (userid, pwsid, name, description, lat, lng, height, wid, wkey, wuid, wupass) 
+        sql = "UPDATE pws SET userid = %s, pwsid = %s, name = %s, description = %s, lat = %s, lng = %s, height = %s, wid = %s, wkey = %s, wuid = %s, wupass = %s WHERE pwsid = %s"
+        values = (userid, pwsid, name, description, lat, lng, height, wid, wkey, wuid, wupass, curpws) 
         db.execute(sql, values)
         mydb.commit()
 
-        return info_msg("weather station added!")
+        return info_msg("weather station updated!")
 
     else:
-        return render_template("settings.html")
+        # Get pwsid
+        curpws = session["curpws"]
+
+        # Get all the user's weather stations
+        sql = "SELECT name, description, lat, lng, height, wid, wkey, wkey, wuid, wupass FROM pws WHERE pwsid = %s"
+        value = (curpws, )
+        db.execute(sql, value)
+        rows = db.fetchall()
+
+        name = rows[0][0]
+        description = rows[0][1]
+        lat = rows[0][2]
+        lng = rows[0][3]
+        height = rows[0][4]
+        wid = rows[0][5]
+        wkey = rows[0][6]
+        wuid = rows[0][7]
+        wupass = rows[0][8]
+
+        return render_template("settings.html", pwsid=curpws, name=name, description=description, lat=lat, lng=lng, height=height, wid=wid, wkey=wkey, wuid=wuid, wupass=wupass, user=user())
     
 @app.route("/login", methods=["GET", "POST"])
 def login():

@@ -9,7 +9,7 @@
 
     <h1>metlog landing page</h1>
 
-    <p>You are logged in as {{ user }} </p>
+    <p>You are logged in as {{ user }}. Selected weather station: {{ curpws }} </p>
 
     <!-- 
     rows: {{ rows }}
@@ -41,6 +41,7 @@
         <th>temperature</th>
         <th>wind</th>
         <th>rain</th>
+        <th>select</th>
         </tr>
 
         {% for row in pws %}
@@ -66,6 +67,11 @@
                 <td>
                     <form action="/rain" method="post">
                         <button class="btn btn-dark" id="pwsid" name="pwsid" value="{{row.pwsid}}" type="submit">details</button>
+                    </form>
+                </td>
+                <td>
+                    <form action="/" method="post">
+                        <button class="btn btn-dark" id="pwsid" name="pwsid" value="{{row.pwsid}}" type="submit">switch</button>
                     </form>
                 </td>
             </tr>

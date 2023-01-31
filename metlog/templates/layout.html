@@ -30,17 +30,34 @@
             <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
               <div class="navbar-nav">
                 {% if session["user_id"] %}
-                <!-- <a class="nav-link active" aria-current="page" href="#">Home</a> -->
-                <a class="nav-link disabled" href="/current">current</a>
-                <a class="nav-link disabled" href="/temperature">temperature</a>
-                <a class="nav-link" href="/addpws">add</a>
-                <a class="nav-link" href="/settings">settings</a>
-                <a class="nav-link" href="/logout">logout</a>
-                <!-- <a class="nav-link disabled">Disabled</a> -->
+                    <!-- <a class="nav-link active" aria-current="page" href="#">Home</a> -->
+
+                    {% if session["curpws"] %}
+                        <a class="nav-link" href="/current">current</a>
+                        <a class="nav-link" href="/temperature">temperature</a>
+                        <a class="nav-link" href="/wind">wind</a>
+                        <a class="nav-link" href="/rain">rain</a>
+                        <a class="nav-link" href="/settings">settings</a>
+                    {% else %}
+                        <a class="nav-link disabled" href="/current">current</a>
+                        <a class="nav-link disabled" href="/temperature">temperature</a>
+                        <a class="nav-link disabled" href="/wind">wind</a>
+                        <a class="nav-link disabled" href="/rain">rain</a>
+                        <a class="nav-link disabled" href="/settings">settings</a>
+                    {% endif %}
+
+                    <a class="nav-link" href="/addpws">add</a>
+                    <!-- <a class="nav-link disabled">Disabled</a> -->
             
+                    {% if session["curpws"] %}
+                        <a class="nav-link" href="#"><strong>[ selected weather station: {{ session["curpws"] }} ]</strong></a>
+                    {% endif %}
+                        <a class="nav-link" href="#"><strong>[ user: {{ user }} ]</strong></a>
+                        <a class="nav-link" href="/logout">logout</a>
+
                 {% else %}
-                <a class="nav-link"  href="/register">register</a>
-                <a class="nav-link" href="/logout">login</a>
+                    <a class="nav-link"  href="/register">register</a>
+                    <a class="nav-link" href="/logout">login</a>
                 {% endif %}
 
               </div>
