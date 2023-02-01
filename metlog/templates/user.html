@@ -1,0 +1,84 @@
+{% extends "layout.html" %}
+
+{% block title %}
+     - change user settings
+{% endblock %}
+
+{% block main %}
+
+    <h1>update settings for {{ user }}</h1>
+    <br>
+    
+    <form action="/user" method="post">
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-2">first name</div>
+            <div class="col-2">
+                    <div class="mb-3">
+                        <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="first" name="first" value="{{ first }}" type="text">
+                    </div>
+            </div>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-2">last name</div>
+            <div class="col-2">
+                <div class="mb-3">
+                    <input class="form-control mx-auto w-auto" id="last" name="last" value="{{ last }}" type="text">
+                </div>
+            </div>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-2">email</div>
+            <div class="col-2">
+                <div class="mb-3">
+                    <input class="form-control mx-auto w-auto" id="email" name="email" value="{{ email }}" type="text">
+                </div>
+            </div>
+        </div>
+                <button class="btn btn-dark" type="submit">submit</button>
+    </div>
+    </form>
+
+    <br>
+    <br>
+
+    <form action="/password" method="post">
+    <div class="container-fluid">
+        <div class="row justify-content-center mb-6">
+        <h3>change password</h3>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-2">current password</div>
+            <div class="col-2">
+                <div class="mb-3">
+                    <input class="form-control mx-auto w-auto" id="password" name="password" placeholder="current password" type="text">
+                </div>
+            </div>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-2">new password</div>
+            <div class="col-2">
+                <div class="mb-3">
+                    <input class="form-control mx-auto w-auto" id="newpass" name="newpass" placeholder="new password" type="text">
+                </div>
+            </div>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-2">confirm new password</div>
+            <div class="col-2">
+                <div class="mb-3">
+                    <input class="form-control mx-auto w-auto" id="confirm" name="confirm" placeholder="password again" type="text">
+                </div>
+            </div>
+        </div>
+
+                <button class="btn btn-dark" type="submit">submit</button>
+    </form>
+
+
+{% endblock %}

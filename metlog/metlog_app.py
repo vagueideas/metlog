@@ -352,6 +352,92 @@ def settings():
 
         return render_template("settings.html", pwsid=curpws, name=name, description=description, lat=lat, lng=lng, height=height, wid=wid, wkey=wkey, wuid=wuid, wupass=wupass, user=user())
     
+@app.route("/password", methods=["POST"])
+@login_required
+def password():
+
+        # get user name
+        user_id = session["user_id"]
+
+        # if user wants to change password
+        password = request.form.get("password")
+        newpass = request.form.get("newpass")
+        confirm = request.form.get("confirm")
+
+        # Form validation
+        if not password:
+            return error_msg("password required", 400)
+
+        if not newpass:
+            return error_msg("password confirmation required", 400)
+
+        if newpass != confirm:
+            return error_msg("new password and confirmation must match", 400)
+
+        # Get user details from db and set session
+        sql = "SELECT id, hash FROM users WHERE id = %s"
+        value = (user_id, )
+        db.execute(sql, value)
+        rows = db.fetchall()
+
+        # Ensure username exists and password is correct
+        if len(rows) != 1 or not check_password_hash(rows[0][1], password):
+            return error_msg("incorrect password", 403)
+        
+        # Generate password hash
+        hash = generate_password_hash(newpass)
+
+        # Insert all values into db
+        sql = "UPDATE users SET hash = %s WHERE id = %s"
+        values = (hash, user_id) 
+        db.execute(sql, values)
+        mydb.commit()
+
+        return info_msg("password changed!")
+
+@app.route("/user", methods=["GET", "POST"])
+@login_required
+def user_settings():
+    """ user settings page """
+
+    if request.method == "POST":
+
+        # Get form data
+        name = request.form.get("name")
+        first = request.form.get("first")
+        last = request.form.get("last")
+        email = request.form.get("email")
+
+
+        # Set user id 
+        userid = session["user_id"]
+
+        # Insert all values into db
+        sql = "UPDATE users SET first = %s, last = %s, email = %s WHERE id = %s"
+        values = (first, last, email, userid) 
+        db.execute(sql, values)
+        mydb.commit()
+
+        return info_msg("user details updated!")
+
+    else:
+
+        # Get user id...
+        userid = session["user_id"]
+    
+        # Get user details
+        sql = "SELECT user, first, last, email FROM users WHERE id = %s"
+        value = (userid, )
+        db.execute(sql, value)
+        rows = db.fetchall()
+
+        name = rows[0][0]
+        first = rows[0][1]
+        last = rows[0][2]
+        email = rows[0][3]
+
+        return render_template("user.html", name=name, first=first, last=last, email=email, user=name)
+    
 @app.route("/login", methods=["GET", "POST"])
 def login():
     """ log user in """

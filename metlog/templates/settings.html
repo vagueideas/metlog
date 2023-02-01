@@ -8,39 +8,99 @@
 
     <h1>update settings for {{ session["curpws"] }}</h1>
     <br>
-
+    
     <form action="/settings" method="post">
-        <div class="mb-3">
-            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="pwsid" name="pwsid" value="{{ pwsid }}" type="text">
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-2">weather station id</div>
+            <div class="col-2">
+                    <div class="mb-3">
+                        <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="pwsid" name="pwsid" value="{{ pwsid }}" type="text">
+                    </div>
+            </div>
         </div>
-        <div class="mb-3">
-            <input class="form-control mx-auto w-auto" id="name" name="name" value="{{ name }}" type="text">
+
+        <div class="row justify-content-center">
+            <div class="col-2">name</div>
+            <div class="col-2">
+                <div class="mb-3">
+                    <input class="form-control mx-auto w-auto" id="name" name="name" value="{{ name }}" type="text">
+                </div>
+            </div>
         </div>
-        <div class="mb-3">
-            <input class="form-control mx-auto w-auto" id="description" name="description" value="{{ description }}" type="text">
+
+        <div class="row justify-content-center">
+            <div class="col-2">description</div>
+            <div class="col-2">
+                <div class="mb-3">
+                    <input class="form-control mx-auto w-auto" id="description" name="description" value="{{ description }}" type="text">
+                </div>
+            </div>
         </div>
-        <div class="mb-3">
-            <input class="form-control mx-auto w-auto" id="lat" name="lat" value="{{ lat }}" type="text">
+
+        <div class="row justify-content-center">
+            <div class="col-2">lat</div>
+            <div class="col-2">
+                <div class="mb-3">
+                    <input class="form-control mx-auto w-auto" id="lat" name="lat" value="{{ lat }}" type="text">
+                </div>
+            </div>
         </div>
-        <div class="mb-3">
-            <input class="form-control mx-auto w-auto" id="lng" name="lng" value="{{ lng }}" type="text">
+
+        <div class="row justify-content-center">
+            <div class="col-2">lng</div>
+            <div class="col-2">
+                <div class="mb-3">
+                    <input class="form-control mx-auto w-auto" id="lng" name="lng" value="{{ lng }}" type="text">
+                </div>
+            </div>
         </div>
-        <div class="mb-3">
-            <input class="form-control mx-auto w-auto" id="height" name="height" value="{{ height }}" type="text">
+
+        <div class="row justify-content-center">
+            <div class="col-2">height</div>
+            <div class="col-2">
+                <div class="mb-3">
+                    <input class="form-control mx-auto w-auto" id="height" name="height" value="{{ height }}" type="text">
+                </div>
+            </div>
         </div>
-        <div class="mb-3">
-            <input class="form-control mx-auto w-auto" id="wid" name="wid" value="{{ wid }}" type="text">
+
+        <div class="row justify-content-center">
+            <div class="col-2">wid</div>
+            <div class="col-2">
+                <div class="mb-3">
+                    <input class="form-control mx-auto w-auto" id="wid" name="wid" value="{{ wid }}" type="text">
+                </div>
+            </div>
         </div>
-        <div class="mb-3">
-            <input class="form-control mx-auto w-auto" id="wkey" name="wkey" value="{{ wkey }}" type="text">
+
+        <div class="row justify-content-center">
+            <div class="col-2">wkey</div>
+            <div class="col-2">
+                <div class="mb-3">
+                    <input class="form-control mx-auto w-auto" id="wkey" name="wkey" value="{{ wkey }}" type="text">
+                </div>
+            </div>
         </div>
-        <div class="mb-3">
-            <input class="form-control mx-auto w-auto" id="wuid" name="wuid" value="{{ wuid }}" type="text">
+
+        <div class="row justify-content-center">
+            <div class="col-2">wuid</div>
+            <div class="col-2">
+                <div class="mb-3">
+                    <input class="form-control mx-auto w-auto" id="wuid" name="wuid" value="{{ wuid }}" type="text">
+                </div>
+            </div>
         </div>
-        <div class="mb-3">
-            <input class="form-control mx-auto w-auto" id="wupass" name="wupass" value="{{ wupass }}" type="text">
+
+        <div class="row justify-content-center">
+            <div class="col-2">wupass</div>
+            <div class="col-2">
+                <div class="mb-3">
+                    <input class="form-control mx-auto w-auto" id="wupass" name="wupass" value="{{ wupass }}" type="text">
+                </div>
+            </div>
         </div>
-        <button class="btn btn-dark" type="submit">submit</button>
+                <button class="btn btn-dark" type="submit">submit</button>
     </form>
 
 
