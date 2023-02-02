@@ -50,7 +50,7 @@
                     <!-- <a class="nav-link disabled">Disabled</a> -->
             
                     {% if session["curpws"] %}
-                        <a class="nav-link" href="#"><strong>[ selected weather station: {{ session["curpws"] }} ]</strong></a>
+                        <a class="nav-link" href="/summary"><strong>[ selected weather station: {{ session["curpws"] }} ]</strong></a>
                     {% endif %}
                         <a class="nav-link" href="/user"><strong>[ user: {{ user }} ]</strong></a>
                         <a class="nav-link" href="/logout">logout</a>

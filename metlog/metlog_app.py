@@ -145,7 +145,7 @@ def temperature():
     rows = db.fetchall()
 
     if not rows:
-        return error_msg("weather data not found: is weather station properly configured and online?")
+        return error_msg("weather data not found: is weather station properly configured and online?", user=user())
 
     # put this into a dict:
     currentwx = {'pwsid': rows[0][0], 'pwskey': rows[0][1], 'timestamp': rows[0][2], 'barohpa': rows[0][3],\
@@ -170,7 +170,7 @@ def temperature():
     }
 
     if wxrecords.get("todaytemphi") == False:
-        return info_msg("today's weather data not found, is weather station online?")
+        return info_msg("today's weather data not found, is weather station online?", user=user())
 
     # Send data to web page
     return render_template("temperature.html", pwsid=pwsid, currentwx=currentwx, wxrecords=wxrecords, user=user())
@@ -265,6 +265,33 @@ def rain():
     return render_template("rain.html", pwsid=pwsid, currentwx=currentwx, wxrecords=wxrecords, user=user())
 
 
+@app.route("/summary", methods=["GET", "POST"])
+@login_required
+def summary():
+    """ display a summary of recent weather """
+
+    # get weather station detail
+    pwsid = session["curpws"]
+
+    wxsummary = []
+
+    wxdetails = {
+    'tempchi': wxquery("SELECT tempchi FROM wxrecords WHERE pwsid = %s AND date(timestamp)=curdate() AND tempchi IS NOT NULL ORDER BY tempchi DESC Limit 1", pwsid),
+    }
+
+    # place into dict
+    wxsummary.append(wxdetails)
+
+    wxdetails = {
+    'tempchi': wxquery("SELECT tempchi FROM wxrecords WHERE pwsid = %s AND date(timestamp)=curdate() - 1 AND tempchi IS NOT NULL ORDER BY tempchi DESC Limit 1", pwsid),
+    }
+
+    # place into dict
+    wxsummary.append(wxdetails)
+
+    # Send data to web page
+    return render_template("summary.html", pwsid=pwsid, wxsummary=wxsummary, user=user())
+
 @app.route("/addpws", methods=["GET", "POST"])
 @login_required
 def addpws():
@@ -294,7 +321,7 @@ def addpws():
         db.execute(sql, values)
         mydb.commit()
 
-        return info_msg("weather station added!")
+        return info_msg("weather station added!", user=user())
 
     else:
         return render_template("add.html", user=user())

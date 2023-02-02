@@ -29,7 +29,7 @@ def error_msg(message, code=400):
     # return render_template("error.html", top=code, bottom=escape(message)), code
     return render_template("error.html", top=code, bottom=message), code
 
-def info_msg(message):
+def info_msg(message, user):
     """display custom info message"""
     def escape(s):
         """
@@ -41,5 +41,5 @@ def info_msg(message):
                          ("%", "~p"), ("#", "~h"), ("/", "~s"), ("\"", "''")]:
             s = s.replace(old, new)
         return s
-    return render_template("info.html", bottom=message)
+    return render_template("info.html", bottom=message, user=user)
 
