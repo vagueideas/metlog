@@ -20,6 +20,19 @@ mydb = mysql.connector.connect(
 db = mydb.cursor()
 
 # make sql queries and return single weather data
+def dailywx(query, pwsid, i, j):
+    sql = query
+    value = (pwsid, i, j)
+
+    db.execute(sql, value)
+    rows = db.fetchone()
+    
+    if not rows:
+        return False
+    
+    return rows[0]
+
+# make sql queries and return single weather data
 def wxquery(query, pwsid, i=0):
     sql = query
 
@@ -275,10 +288,48 @@ def rain():
     # Send data to web page
     return render_template("rain.html", pwsid=pwsid, currentwx=currentwx, wxrecords=wxrecords, user=user())
 
-
-@app.route("/summary", methods=["GET", "POST"])
+@app.route("/today", methods=["GET", "POST"])
 @login_required
-def summary():
+def today():
+    """ display a summary of recent weather """
+
+    # get weather station detail
+    pwsid = session["curpws"]
+
+    # complex date part of query
+    date_query = "date(timestamp) = DATE(SUBTIME(now(), %s)) AND HOUR(timestamp) = HOUR(SUBTIME(now(), %s))"
+
+    wxsummary = []
+
+    # get 2 weeks weather data
+    # the queries below break if 0 is passed as an int, so use str(i) 
+    for i in range(0,24):
+        wxdetails = {
+        'date': wxquery("SELECT DATE_FORMAT(DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL %s HOUR), \"%D %b, %H:%i\")", str(i)),
+        # 'tempclo': wxquery("SELECT tempc FROM snapshot WHERE pwsid = %s AND date(timestamp) = DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL %s HOUR) AND tempc IS NOT NULL ORDER BY tempc ASC Limit 1", pwsid, str(i)),
+        # 'tempclo': dailywx("SELECT tempc FROM snapshot WHERE pwsid = %s AND date(timestamp) = DATE(SUBTIME(now(), %s)) AND HOUR(timestamp) = HOUR(SUBTIME(now(), %s)) AND tempc IS NOT NULL ORDER BY tempc ASC Limit 1", pwsid, str(i) + ":0:0", str(i) + ":0:0"),
+        'tempclo': dailywx("SELECT tempc FROM snapshot WHERE pwsid = %s AND " + date_query + " AND tempc IS NOT NULL ORDER BY tempc ASC Limit 1", pwsid, str(i) + ":0:0", str(i) + ":0:0"),
+        'avgtempc': dailywx("SELECT CAST(AVG(tempc) AS INT) FROM snapshot WHERE pwsid = %s AND " + date_query, pwsid, str(i) + ":0:0", str(i) + ":0:0"),
+        'tempchi': dailywx("SELECT tempc FROM snapshot WHERE pwsid = %s AND " + date_query + " AND tempc IS NOT NULL ORDER BY tempc DESC Limit 1", pwsid, str(i) + ":0:0", str(i) + ":0:0"),
+        'intempclo': dailywx("SELECT intempc FROM snapshot WHERE pwsid = %s AND " + date_query + " AND intempc IS NOT NULL ORDER BY intempc ASC Limit 1", pwsid, str(i) + ":0:0", str(i) + ":0:0"),
+        'intempchi': dailywx("SELECT intempc FROM snapshot WHERE pwsid = %s AND " + date_query + " AND intempc IS NOT NULL ORDER BY intempc DESC Limit 1", pwsid, str(i) + ":0:0", str(i) + ":0:0"),
+        'windspeedmshi': dailywx("SELECT windspeedms FROM snapshot WHERE pwsid = %s AND " + date_query + " AND windspeedms IS NOT NULL ORDER BY windspeedms DESC Limit 1", pwsid, str(i) + ":0:0", str(i) + ":0:0"),
+        'windgustmshi': dailywx("SELECT windgustms FROM snapshot WHERE pwsid = %s AND " + date_query + " AND windgustms IS NOT NULL ORDER BY windgustms DESC Limit 1", pwsid, str(i) + ":0:0", str(i) + ":0:0"),
+        'rainmmhi': dailywx("SELECT rainmm FROM snapshot WHERE pwsid = %s AND " + date_query + " AND rainmm IS NOT NULL ORDER BY rainmm DESC Limit 1", pwsid, str(i) + ":0:0", str(i) + ":0:0"),
+        }
+
+        # place into dict
+        wxsummary.append(wxdetails)
+
+    # whats this look like
+    # return info_msg(wxsummary, user=user)
+
+    # Send data to web page
+    return render_template("today.html", pwsid=pwsid, wxsummary=wxsummary, user=user())
+
+@app.route("/recent", methods=["GET", "POST"])
+@login_required
+def recent():
     """ display a summary of recent weather """
 
     # get weather station detail
@@ -286,32 +337,29 @@ def summary():
 
     wxsummary = []
 
-    for i in range(1,14):
+    # get 2 weeks weather data
+    # the queries below break if 0 is passed as an int, so use str(i) 
+    for i in range(0,14):
         wxdetails = {
-        'tempchi': wxquery("SELECT tempchi FROM wxrecords WHERE pwsid = %s AND date(timestamp) = DATE_SUB(CURRENT_DATE(), INTERVAL %s DAY) AND tempchi IS NOT NULL ORDER BY tempchi DESC Limit 1", pwsid, i),
+        'date': wxquery("SELECT DATE_FORMAT(DATE_SUB(CURRENT_DATE(), INTERVAL %s DAY), \"%d %M %Y\")", str(i)),
+        'tempchi': wxquery("SELECT tempchi FROM wxrecords WHERE pwsid = %s AND date(timestamp) = DATE_SUB(CURRENT_DATE(), INTERVAL %s DAY) AND tempchi IS NOT NULL ORDER BY tempchi DESC Limit 1", pwsid, str(i)),
+        'tempclo': wxquery("SELECT tempclo FROM wxrecords WHERE pwsid = %s AND date(timestamp) = DATE_SUB(CURRENT_DATE(), INTERVAL %s DAY) AND tempclo IS NOT NULL ORDER BY tempclo DESC Limit 1", pwsid, str(i)),
+        'intempclo': wxquery("SELECT intempclo FROM wxrecords WHERE pwsid = %s AND date(timestamp) = DATE_SUB(CURRENT_DATE(), INTERVAL %s DAY) AND intempclo IS NOT NULL ORDER BY intempclo DESC Limit 1", pwsid, str(i)),
+        'intempchi': wxquery("SELECT intempchi FROM wxrecords WHERE pwsid = %s AND date(timestamp) = DATE_SUB(CURRENT_DATE(), INTERVAL %s DAY) AND intempchi IS NOT NULL ORDER BY intempchi DESC Limit 1", pwsid, str(i)),
+        'windspeedmshi': wxquery("SELECT windspeedmshi FROM wxrecords WHERE pwsid = %s AND date(timestamp) = DATE_SUB(CURRENT_DATE(), INTERVAL %s DAY) AND windspeedmshi IS NOT NULL ORDER BY windspeedmshi DESC Limit 1", pwsid, str(i)),
+        'windgustmshi': wxquery("SELECT windgustmshi FROM wxrecords WHERE pwsid = %s AND date(timestamp) = DATE_SUB(CURRENT_DATE(), INTERVAL %s DAY) AND windgustmshi IS NOT NULL ORDER BY windgustmshi DESC Limit 1", pwsid, str(i)),
+        'rainmmhi': wxquery("SELECT rainmmhi FROM wxrecords WHERE pwsid = %s AND date(timestamp) = DATE_SUB(CURRENT_DATE(), INTERVAL %s DAY) AND rainmmhi IS NOT NULL ORDER BY rainmmhi DESC Limit 1", pwsid, str(i)),
+        'dailyrainmmhi': wxquery("SELECT dailyrainmmhi FROM wxrecords WHERE pwsid = %s AND date(timestamp) = DATE_SUB(CURRENT_DATE(), INTERVAL %s DAY) AND dailyrainmmhi IS NOT NULL ORDER BY dailyrainmmhi DESC Limit 1", pwsid, str(i)),
         }
 
         # place into dict
         wxsummary.append(wxdetails)
 
-    """
-    wxdetails = {
-    'tempchi': wxquery("SELECT tempchi FROM wxrecords WHERE pwsid = %s AND date(timestamp) = DATE_SUB(CURRENT_DATE(), INTERVAL 1 DAY) AND tempchi IS NOT NULL ORDER BY tempchi DESC Limit 1", pwsid),
-    }
-
-    # place into dict
-    wxsummary.append(wxdetails)
-
-    wxdetails = {
-    'tempchi': wxquery("SELECT tempchi FROM wxrecords WHERE pwsid = %s AND date(timestamp) = DATE_SUB(CURRENT_DATE(), INTERVAL 2 DAY) AND tempchi IS NOT NULL ORDER BY tempchi DESC Limit 1", pwsid),
-    }
-
-    # place into dict
-    wxsummary.append(wxdetails)
-    """
+    # whats this look like
+    # return info_msg(wxsummary, user=user)
 
     # Send data to web page
-    return render_template("summary.html", pwsid=pwsid, wxsummary=wxsummary, user=user())
+    return render_template("recent.html", pwsid=pwsid, wxsummary=wxsummary, user=user())
 
 @app.route("/addpws", methods=["GET", "POST"])
 @login_required

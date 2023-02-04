@@ -1,0 +1,107 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    weather summary
+{% endblock %}
+
+{% block main %}
+
+    <h1>recent weather summary</h1>
+
+    {% if rows == 0 %}
+
+    <div class="alert alert-dark" role="alert">
+    You haven't set a weather station up yet:   
+    <a class="btn btn-dark" href="/addpws" role="button">add weather station</a>
+    </div>
+
+    {% else %}
+
+        <h2>for {{ session["curpws"] }}</h2>
+
+        <table class="table">
+        <tr>
+        <th>date</th>
+        <th>lowest temperature</th>
+        <th>highest temperature</th>
+        <th>highest wind speed</th>
+        <th>highest wind gust</th>
+        <th>highest hourly rain</th>
+        <th>daily rain</th>
+        <th>lowest indoor temp</th>
+        <th>highest indoor temp</th>
+        </tr>
+
+        {% for row in wxsummary %}
+
+            <tr>
+                <td>{{ row.date }} </td>
+                <td>
+                {% if row.tempclo|string == "False" %}
+                    no data
+                {% else %}
+                    {{ row.tempclo / 10}}&degC 
+                {% endif %}
+                </td>
+                <td>
+                {% if row.tempchi|string == "False" %}
+                    no data
+                {% else %}
+                    {{ row.tempchi / 10}}&degC 
+                {% endif %}
+                </td>
+                <td>
+                {% if row.windspeedmshi|string == "False" %}
+                    no data
+                {% else %}
+                    {{ row.windspeedmshi / 100 }}m/s 
+                {% endif %}
+                </td>
+                <td>
+                {% if row.windgustmshi|string == "False" %}
+                    no data
+                {% else %}
+                    {{ row.windgustmshi / 100 }}m/s 
+                {% endif %}
+                </td>
+                <td>
+                {% if row.rainmmhi|string == "False" %}
+                    no data
+                {% else %}
+                    {{ row.rainmmhi / 100 }}mm 
+                {% endif %}
+                </td>
+                <td>
+                {% if row.dailyrainmmhi|string == "False" %}
+                    no data
+                {% else %}
+                    {{ row.dailyrainmmhi / 10}}mm 
+                {% endif %}
+                </td>
+                <td>
+                {% if row.intempclo|string == "False" %}
+                    no data
+                {% else %}
+                    {{ row.intempclo / 10}}&degC 
+                {% endif %}
+                </td>
+                <td>
+                {% if row.intempchi|string == "False" %}
+                    no data
+                {% else %}
+                    {{ row.intempchi / 10}}&degC 
+                {% endif %}
+                </td>
+            </tr>
+
+        {% endfor %}
+
+        </table>
+
+
+    {% endif %}
+
+    
+
+
+{% endblock %}

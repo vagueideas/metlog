@@ -34,23 +34,26 @@
 
                     {% if session["curpws"] %}
                         <a class="nav-link" href="/current">current</a>
+                        <a class="nav-link" href="/today">today</a>
                         <a class="nav-link" href="/temperature">temperature</a>
                         <a class="nav-link" href="/wind">wind</a>
                         <a class="nav-link" href="/rain">rain</a>
-                        <a class="nav-link" href="/settings">settings</a>
+                        <a class="nav-link" href="/recent">recent</a>
                     {% else %}
                         <a class="nav-link disabled" href="/current">current</a>
+                        <a class="nav-link disabled" href="/today">today</a>
                         <a class="nav-link disabled" href="/temperature">temperature</a>
                         <a class="nav-link disabled" href="/wind">wind</a>
                         <a class="nav-link disabled" href="/rain">rain</a>
-                        <a class="nav-link disabled" href="/settings">settings</a>
+                        <a class="nav-link disabled" href="/recent">recent
+                        </a>
                     {% endif %}
 
                     <a class="nav-link" href="/addpws">add</a>
                     <!-- <a class="nav-link disabled">Disabled</a> -->
             
                     {% if session["curpws"] %}
-                        <a class="nav-link" href="/summary"><strong>[ selected weather station: {{ session["curpws"] }} ]</strong></a>
+                        <a class="nav-link" href="/settings"><strong>[ selected weather station: {{ session["curpws"] }} ]</strong></a>
                     {% endif %}
                         <a class="nav-link" href="/user"><strong>[ user: {{ user }} ]</strong></a>
                         <a class="nav-link" href="/logout">logout</a>
