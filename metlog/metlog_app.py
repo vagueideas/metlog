@@ -94,7 +94,8 @@ def index():
     # If there are no weather stations
     if not rows:
         # A value of 0 will prompt the user to setup a new pws
-        rows = 0
+        # rows = 0
+        return redirect("/addpws")
     else:
         # Create a list of pws info
         pws = []
@@ -471,10 +472,12 @@ def password():
             return error_msg("new password and confirmation must match", 400)
 
         # Get user details from db and set session
-        sql = "SELECT id, hash FROM users WHERE id = %s"
+        sql = "SELECT id, hash, user FROM users WHERE id = %s"
         value = (user_id, )
         db.execute(sql, value)
         rows = db.fetchall()
+
+        user=rows[0][2]
 
         # Ensure username exists and password is correct
         if len(rows) != 1 or not check_password_hash(rows[0][1], password):
@@ -489,17 +492,31 @@ def password():
         db.execute(sql, values)
         mydb.commit()
 
-        return info_msg("password changed!")
+        return info_msg("password changed!", user=user)
 
 @app.route("/user", methods=["GET", "POST"])
 @login_required
 def user_settings():
     """ user settings page """
 
+    # Get user id...
+    userid = session["user_id"]
+    
+    # Get user details
+    sql = "SELECT user, first, last, email FROM users WHERE id = %s"
+    value = (userid, )
+    db.execute(sql, value)
+    rows = db.fetchall()
+
+    user = rows[0][0]
+    first = rows[0][1]
+    last = rows[0][2]
+    email = rows[0][3]
+
     if request.method == "POST":
 
         # Get form data
-        name = request.form.get("name")
+        # name = request.form.get("name")
         first = request.form.get("first")
         last = request.form.get("last")
         email = request.form.get("email")
@@ -514,25 +531,11 @@ def user_settings():
         db.execute(sql, values)
         mydb.commit()
 
-        return info_msg("user details updated!")
+        return info_msg("user details updated!", user=user)
 
     else:
 
-        # Get user id...
-        userid = session["user_id"]
-    
-        # Get user details
-        sql = "SELECT user, first, last, email FROM users WHERE id = %s"
-        value = (userid, )
-        db.execute(sql, value)
-        rows = db.fetchall()
-
-        name = rows[0][0]
-        first = rows[0][1]
-        last = rows[0][2]
-        email = rows[0][3]
-
-        return render_template("user.html", name=name, first=first, last=last, email=email, user=name)
+        return render_template("user.html", first=first, last=last, email=email, user=user)
     
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -625,11 +628,13 @@ def register():
             value = (user, )
             db.execute(sql, value)
             rows = db.fetchone()
-           
+            
+            if not rows:
+                return False
+    
             session["user_id"] = rows[0]
 
-
-            return info_msg(rows)
+            return info_msg(f'user \"{user}\" added', user=user)
 
         else:
             # User already exists error message
